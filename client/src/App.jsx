@@ -84,7 +84,7 @@ function App() {
       .catch(e => { 
         handleError(e); 
       } );
-  }, [dirty]);
+  }, []);
 
    //dovrei inserire anche una useEffect che ricarica ogni volta che confermiamo il carrello. infatti ci saranno pacchetti che diventeranno non disponibili. qua farò dipendere la mia useEffect da dirty
    
@@ -111,7 +111,7 @@ function App() {
         .then(p => {
           setPackages(p);
           setLoading(false);
-          console.log(p);
+          //console.log(p);
         })
       }
       catch (err) {
@@ -129,7 +129,7 @@ function App() {
         
         <Route path='/restaurants/:resId' element={ <PackageRoute user={user} logout={doLogOut} 
           errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')}
-          loading={loading} restaurants={restaurants} packages={packages}/> } />
+          loading={loading} packages={packages}/> } />
 
         <Route path='/login' element={loggedIn? <Navigate replace to='/' />:  <LoginForm loginSuccessful={loginSuccessful} />} />
 

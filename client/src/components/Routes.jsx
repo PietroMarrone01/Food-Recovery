@@ -57,7 +57,7 @@ function PackageRoute(props) {
         {props.errorMsg? 
         <Alert variant='danger' dismissible className='my-2' onClose={props.resetErrorMsg}> {props.errorMsg}</Alert> : null}
         {props.loading ? 
-        <LoadingSpinner /> : <PackagesList user={props.user} packages={props.packages} restaurants={props.restaurants}/> }
+        <LoadingSpinner /> : <PackagesList user={props.user} packages={props.packages} loading={props.loading}/> }
       </Container>
     </>
       

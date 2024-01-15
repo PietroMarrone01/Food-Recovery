@@ -155,11 +155,11 @@ function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
  * @param endTime l'ora di fine prelievo del pacchetto
  * @param availability indica se il pacchetto è disponibile (0 per false, 1 per true)
  */
-function Package(id, restaurantId, restaurantName, isSurprisePackage, content, price, size, startTime, endTime, availability) {
+function Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability) {
   this.id = id;
   this.restaurantId = restaurantId;
   this.restaurantName = restaurantName;
-  this.isSurprisePackage = isSurprisePackage;
+  this.surprisePackage = surprisePackage;
   this.content = content;
   this.price = price;
   this.size = size;

@@ -58,7 +58,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions)); 
 
-const answerDelay = 1300;
+const answerDelay = 1200;
 
 // custom middleware: check if a given request is coming from an authenticated user
 const isLoggedIn = (req, res, next) => {
@@ -106,7 +106,7 @@ app.get('/api/restaurants/:id/packages', isLoggedIn, async (req, res) => {
     if(packages.error)
       res.status(404).json(packages);
     else
-      setTimeout(()=>res.json(packages), answerDelay);
+      setTimeout(()=>res.json(packages), answerDelay); 
   } catch (err) {
     console.log(err);
     res.status(500).end();
