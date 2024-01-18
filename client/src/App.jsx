@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Link, Navigate, Outlet, useNavigate, useP
 import { Col, Container, Row, Spinner, Button, Form, Table, Toast } from 'react-bootstrap';
 import API from './API';
 import {LoginForm} from './components/Miscellaneous';
-import {RestaurantRoute, PackageRoute, NotFoundPage} from './components/Routes';
+import {RestaurantRoute, PackageRoute, BookingRoute, NotFoundPage} from './components/Routes';
 //import './App.css'
 
 
@@ -16,7 +16,18 @@ function App() {
   const [restaurants, setRestaurants] = useState([]);
 
   /** Lista di pacchetti */
-  const [packages, setPackages] = useState([]); 
+  const [packages, setPackages] = useState([]);
+
+  /** Lista dei ristoranti per cui l'utente ha già aggiunto un pacchetto al carrello. Utile per disabilitare bottone "Aggiungi al carrello" 
+   * se un altro pacchetto dello stesso ristorante è già stato aggiunto*/
+  const [addedRestaurants, setAddedRestaurants] = useState([]);
+  
+  /** Lista di pacchetti nel carrello + stato per la visualizzazione del carrello*/
+  const [cartItems, setCartItems] = useState([]);
+  const [showCart, setShowCart] = useState(false);
+
+  /** Lista delle prenotazioni */
+  const [bookings, setBookings] = useState([]);
 
   /** Informazioni sull'utente attualmente connesso. Questo è undefined quando nessun utente è connesso */
   const [user, setUser] = useState(undefined);
@@ -94,16 +105,20 @@ function App() {
     await API.logOut();
     setLoggedIn(false);
     setUser(undefined);
+    setCartItems([]);
+    setAddedRestaurants([]);
   }
   
   const loginSuccessful = (user) => {
     setUser(user);  //user passato dal server lo tengo in uno stato. memorizzo questa informazione in uno stato
     setLoggedIn(true);
     setDirty(true);  // load latest version of data
+    setCartItems([]);
+    setAddedRestaurants([]);
   }
-  /** ---- FUNZIONI PER LA GESTIONE DEL LOGIN ---- */
 
 
+  /** ---- FUNZIONE PER LA VISUALIZZAZIONE DEI PACCHETTI ---- */
   const handleEnterStore = async (id) => {
     if (loggedIn) {
       try {
@@ -120,16 +135,104 @@ function App() {
     }
   };
 
+    /** ---- FUNZIONE PER LA VISUALIZZAZIONE DELLE PRENOTAZIONI ---- 
+    const handleEnterBookings = async () => {
+      if (loggedIn) {
+        try {
+          API.getAllBookings()
+          .then(b => {
+            setBookings(b);
+            setLoading(false);
+            //console.log(b);
+          })
+        }
+        catch (err) {
+          handleError(err)
+        }
+      }
+    };
+
+    */
+
+    const handleEnterBookings = () => {
+      setLoading(false);
+    }
+
+  /** ---- FUNZIONI PER LA GESTIONE DEL CARRELLO ---- */
+  const addToCart = (p) => {
+    setCartItems((prevItems) => [...prevItems, p]);
+    setAddedRestaurants((prevRestaurants) => [...prevRestaurants, p.restaurantId]);
+  };
+
+  const removeFromCart = (p) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== p.id));
+    setAddedRestaurants((prevRestaurants) => prevRestaurants.filter((restaurantId) => restaurantId !== p.restaurantId));
+  };
+
+  //Funzione chiamata quando vado a rimuovere fino ad un max di 2 tipi di cibo dal pacchetto
+  const updateCart = (newP) => {
+    setCartItems((prevItems) => prevItems.map((e) => {
+      if (e.id === newP.id) {
+        e = newP;
+        return newP;
+      } else {
+        return e;
+      }
+    }));
+  }
+
+
+  const handleConfirm = async () => {
+    const packageIds = cartItems.map((item) => item.id);
+    //console.log(packageIds);
+    
+    try {  
+      const response = await API.createBooking(packageIds);
+  
+      if (response.success) {
+        console.log('Prenotazione confermata con successo!');
+      } else {
+        // Alcuni pacchetti non sono più disponibili
+        console.log('Alcuni pacchetti non sono più disponibili:', response.unavailablePackages);
+  
+        // Aggiorna il carrello rimuovendo i pacchetti non disponibili
+        //const updatedCart = cartItems.filter((item) => !response.unavailablePackages.includes(item.id));
+        //updateCart(updatedCart);
+  
+        // Mostra un messaggio all'utente (puoi gestire questo nel tuo modo, ad esempio, mostrando un alert)
+        alert('Alcuni pacchetti non sono più disponibili. Sono stati rimossi dal carrello.');
+      }
+  
+      // Reset e chiusura del carrello 
+      setCartItems([]);
+      setAddedRestaurants([]);
+      setShowCart(false);
+    } catch (error) {
+      console.error('Errore durante la conferma del carrello:', error);
+      handleError(error);
+    }
+  };
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={ <RestaurantRoute user={user} logout={doLogOut} 
-          errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')}
-          loading={loading} restaurants={restaurants} showPackages={handleEnterStore} setLoading={setLoading}/> } />
+        <Route path='/' element={ <RestaurantRoute user={user} logout={doLogOut}  errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')}
+          loading={loading} setLoading={setLoading} restaurants={restaurants} showPackages={handleEnterStore} 
+          cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
+          removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} 
+          showBookings={handleEnterBookings}/> } />
         
-        <Route path='/restaurants/:resId' element={ <PackageRoute user={user} logout={doLogOut} 
-          errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')}
-          loading={loading} packages={packages}/> } />
+        <Route path='/restaurants/:resId' element={ <PackageRoute user={user} logout={doLogOut} errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')} 
+          loading={loading} setLoading={setLoading} packages={packages} 
+          cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
+          addToCart={addToCart} removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} 
+          addedRestaurants={addedRestaurants}
+          showBookings={handleEnterBookings}/> } />
+        
+        <Route path='/bookings' element={ <BookingRoute user={user} logout={doLogOut} errorMsg={errorMsg} 
+          resetErrorMsg={()=>setErrorMsg('')} loading={loading} bookings={bookings}
+          cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
+          removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} /> } />
 
         <Route path='/login' element={loggedIn? <Navigate replace to='/' />:  <LoginForm loginSuccessful={loginSuccessful} />} />
 

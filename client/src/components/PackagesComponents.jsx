@@ -8,7 +8,7 @@ import { LoadingSpinner } from './Routes';
 import dayjs from 'dayjs';
 
 function PackageRow(props) {
-  const { p } = props;
+  const { p, addToCart, setShowCart, addedRestaurants } = props;
 
   const renderPackageType = () => {
     return p.surprisePackage ? 'Pacchetto sorpresa' : 'Pacchetto normale';
@@ -16,16 +16,21 @@ function PackageRow(props) {
 
   const renderContent = () => {
     if (p.content && p.content.length > 0) {
-      // Se ci sono elementi in content, li mostreremo concatenati
-      return p.content.map((item, index) => (
-        <div key={index}>
-          {item.name} - Quantità: {item.quantity}
-        </div>
-      ));
+      // Se ci sono elementi in content, li mostreremo come un elenco puntato
+      return (
+        <ul>
+          {p.content.map((item, index) => (
+            <li key={index}>
+              {item.name} - Quantità: {item.quantity}
+            </li>
+          ))}
+        </ul>
+      );
     } else {
       return 'Non è possibile visualizzare il contenuto';
     }
   };
+  
 
   const renderAvailability = () => {
     return p.availability ? 'Disponibile' : 'Prenotato';
@@ -36,14 +41,11 @@ function PackageRow(props) {
   const currentTime = dayjs().format('HH:mm');
 
   // Funzione per controllare se l'orario corrente è compreso tra startTime e endTime
-  const timeCheck = (currentTime, startTime, endTime) => {
+  const timeCheck = (currentTime, endTime) => {
     return currentTime < endTime;
   };
 
-  const isWithinTimeRange = timeCheck(currentTime, startTime, endTime);
-
-  //bisogna fare una funzione che raccglie tutte le casistiche in cui un pacchetto può non essere più selezionato (data, mancata disponibilità, altro pachetto già scelto)
-  //e poi disabilitare il bottone in base a queste casistiche. 
+  const isWithinTimeRange = timeCheck(currentTime, endTime);
 
   return (
     <tr>
@@ -55,7 +57,8 @@ function PackageRow(props) {
       <td>{endTime}</td>
       <td>{renderAvailability()}</td>
       <td>
-        <Button variant='primary' className='float-end' disabled={!isWithinTimeRange}>
+        <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
+        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
           Aggiungi al carrello
         </Button>
       </td>
@@ -65,13 +68,15 @@ function PackageRow(props) {
 
 function PackagesList(props) {
 
+  const { showBookings, setLoading } = props;
+
   const navigate = useNavigate();
 
   const { resId } = useParams();
 
   const packagesList = props.packages.map((p) => {
-    const { id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability } = p;
-    return new Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability);
+    const { id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability} = p;
+    return new Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, 0);
   });
 
   //console.log(packagesList);
@@ -83,7 +88,7 @@ function PackagesList(props) {
         <Col className="mt-3">
           <Alert variant="info" className="text-center">
             <h5 className="font-weight-bold">
-              E' possibile inserire nel carrello un solo pacchetto per ristorante. I pacchetti la cui "Data fine prelievo" è scaduta non possono più essere selezionati.
+              E' possibile inserire nel carrello un solo pacchetto disponibile per ristorante. I pacchetti la cui "Data fine prelievo" è scaduta non possono più essere selezionati.
             </h5>
           </Alert>
         </Col>
@@ -109,7 +114,7 @@ function PackagesList(props) {
             </thead>
             <tbody>
               {packagesList.map((p) =>
-                <PackageRow p={p} key={p.id} />)
+                <PackageRow p={p} key={p.id} addToCart={props.addToCart} setShowCart={props.setShowCart} addedRestaurants={props.addedRestaurants}/>)
               }
             </tbody>
           </Table>
@@ -117,7 +122,12 @@ function PackagesList(props) {
       </Row>
       <Row className="mb-2">
         <Col>
-        <Button variant='secondary' onClick={()=>navigate('/bookings')} disabled={props.user?.id? false : true}> Le mie prenotazioni </Button>
+        <Button variant='secondary' onClick={() => {
+          setLoading(true);
+          showBookings(); 
+          navigate('/bookings'); }} 
+          disabled={props.user?.id? false : true}> Le mie prenotazioni 
+        </Button>
         </Col>
       </Row>
       <Row>

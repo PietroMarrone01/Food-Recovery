@@ -1,10 +1,11 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/AoyUG5Y1)
-# Exam #12345: "Exam Title"
-## Student: s123456 LASTNAME FIRSTNAME 
+# Exam #12345: "Recupero Cibo"
+## Student: s310561 Marrone Pietro 
 
 ## React Client Application Routes
 
 - Route `/`: pagina principale, mostra la lista completa dei ristoranti quando si arriva sul sito
+- Route `/restaurants/:resId`: pagina per la visualizzazione dei pacchetti di ciascun ristorante
 - Route `/bookings`: pagina per la visualizzazione delle prenotazioni di un utente
 - Route `/login`: pagina per fare il login
 - Route `*`: per le pagine che non esistono
@@ -98,6 +99,9 @@ Response body: _None_
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- enrico@test.com, pwd (plus any other requested info)
+- luigi@test.com, pwd (plus any other requested info)
+- alice@test.com, pwd (plus any other requested info)
+- harry@test.com, pwd (plus any other requested info)
+- carol@test.com, pwd (plus any other requested info)
 

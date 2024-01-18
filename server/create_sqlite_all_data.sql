@@ -34,6 +34,16 @@ CREATE TABLE IF NOT EXISTS "bookings" (
     "user_id" INTEGER,
     "package_ids" TEXT /* Nuovo campo per memorizzare gli id dei pacchetti della prenotazione */ 
 );
+
+CREATE TABLE IF NOT EXISTS "booking_packages" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "booking_id" INTEGER,
+    "package_id" INTEGER,
+    FOREIGN KEY ("booking_id") REFERENCES "bookings" ("id"),
+    FOREIGN KEY ("package_id") REFERENCES "packages" ("id")
+);
+
+
 INSERT INTO "users" VALUES (1,'enrico@test.com','Enrico', '123348dusd437840', 'bddfdc9b092918a7f65297b4ba534dfe306ed4d5d72708349ddadb99b1c526fb'); /* password='pwd' */
 INSERT INTO "users" VALUES (2,'luigi@test.com','Luigi',   '7732qweydg3sd637', '498a8d846eb4efebffc56fc0de16d18905714cf12edf548b8ed7a4afca0f7c1c');
 INSERT INTO "users" VALUES (3,'alice@test.com','Alice',   'wgb32sge2sh7hse7', '09a79c91c41073e7372774fcb114b492b2b42f5e948c61d775ad4f628df0e160');
@@ -59,11 +69,11 @@ INSERT INTO "packages" VALUES (5, 2, 'Pizzeria Margherita', 1, NULL, 29.99, 'Gra
 -- Pizzeria Vesuvio
 INSERT INTO "packages" VALUES (6, 3, 'Pizzeria Vesuvio', 0, '[{"name": "Vesuvio Special", "quantity": 1}, {"name": "Bruschetta", "quantity": 2}, {"name": "Marinara", "quantity": 1}, {"name": "Pane", "quantity": 3}]', 16.99, 'Media', '2024-01-25 00:00:00', '2024-01-25 04:00:00', 1);
 INSERT INTO "packages" VALUES (7, 3, 'Pizzeria Vesuvio', 0, '[{"name": "Family Pizza", "quantity": 2}, {"name": "Insalata di Rucola", "quantity": 1}, {"name": "Crostata di Frutta", "quantity": 1}, {"name": "Ciccio", "quantity": 1}]', 32.99, 'Grande', '2024-01-25 07:30:00', '2024-01-25 17:00:00', 1);
-INSERT INTO "packages" VALUES (8, 3, 'Pizzeria Vesuvio', 1, NULL, 39.99, 'Piccola', '2024-01-25 12:00:00', '2024-01-25 23:30:00', 1);
+INSERT INTO "packages" VALUES (8, 3, 'Pizzeria Vesuvio', 1, NULL, 39.99, 'Piccola', '2024-01-25 12:00:00', '2024-01-25 23:30:00', 0);
 
 -- Fruttivendolo Bio
 INSERT INTO "packages" VALUES (9, 4, 'Fruttivendolo Bio', 0, '[{"name": "Fruit Basket", "quantity": 3}, {"name": "Yogurt Biologico", "quantity": 2}, {"name": "Banane", "quantity": 2}, {"name": "Albicocche", "quantity": 2}]', 18.99, 'Media', '2024-01-25 09:00:00', '2024-01-25 18:00:00', 1);
-INSERT INTO "packages" VALUES (10, 4, 'Fruttivendolo Bio', 1, NULL, 22.99, 'Grande', '2024-01-25 08:00:00', '2024-01-25 23:30:00', 1);
+INSERT INTO "packages" VALUES (10, 4, 'Fruttivendolo Bio', 1, NULL, 22.99, 'Grande', '2024-01-25 08:00:00', '2024-01-25 23:30:00', 0);
 INSERT INTO "packages" VALUES (11, 4, 'Fruttivendolo Bio', 1, NULL, 12.99, 'Piccolo', '2024-01-25 03:00:00', '2024-01-25 09:00:00', 1);
 INSERT INTO "packages" VALUES (12, 4, 'Fruttivendolo Bio', 0, '[{"name": "Veggie Delight", "quantity": 2}, {"name": "Insalata di Frutta", "quantity": 1}, {"name": "Mele", "quantity": 2}, {"name": "Pere", "quantity": 2}]', 25.99, 'Grande', '2024-01-25 18:00:00', '2024-01-25 21:00:00', 1);
 
@@ -73,9 +83,9 @@ INSERT INTO "packages" VALUES (13, 5, 'Sushi Fusion', 0, '[{"name": "Sushi Assor
 -- Dolci Tentazioni
 INSERT INTO "packages" VALUES (14, 6, 'Dolci Tentazioni', 0, '[{"name": "Dolce al Cioccolato", "quantity": 2}, {"name": "Tiramisù", "quantity": 1}]', 21.99, 'Piccola', '2024-01-25 20:00:00', '2024-01-25 22:00:00', 1);
 INSERT INTO "packages" VALUES (15, 6, 'Dolci Tentazioni', 1, NULL, 29.99, 'Grande', '2024-01-25 16:00:00', '2024-01-25 23:30:00', 1);
-INSERT INTO "packages" VALUES (16, 6, 'Dolci Tentazioni', 1, NULL, 19.99, 'Medio', '2024-01-25 00:00:00', '2024-01-25 04:00:00', 1);
+INSERT INTO "packages" VALUES (16, 6, 'Dolci Tentazioni', 1, NULL, 19.99, 'Medio', '2024-01-25 00:00:00', '2024-01-25 04:00:00', 0);
 INSERT INTO "packages" VALUES (17, 6, 'Dolci Tentazioni', 0, '[{"name": "Chocolate Lover Pack", "quantity": 3}, {"name": "Panna Cotta", "quantity": 1}]', 26.99, 'Medio', '2024-01-25 18:30:00', '2024-01-25 20:00:00', 1);
-INSERT INTO "packages" VALUES (18, 6, 'Dolci Tentazioni', 1, NULL, 9.99, 'Piccolo', '2024-01-25 00:00:00', '2024-01-25 04:00:00', 1);
+INSERT INTO "packages" VALUES (18, 6, 'Dolci Tentazioni', 1, NULL, 9.99, 'Piccolo', '2024-01-25 00:00:00', '2024-01-25 04:00:00', 0);
 INSERT INTO "packages" VALUES (19, 6, 'Dolci Tentazioni', 0, '[{"name": "Chocolate Lover Pack", "quantity": 3}, {"name": "Panna Cotta", "quantity": 2}, {"name": "Biscotti", "quantity": 3}, {"name": "Tiramisù", "quantity": 1}]', 36.99, 'Grande', '2024-01-25 18:30:00', '2024-01-25 20:00:00', 1);
 
 COMMIT;

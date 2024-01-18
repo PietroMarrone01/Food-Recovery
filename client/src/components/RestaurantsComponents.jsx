@@ -9,9 +9,7 @@ import {Restaurant} from './Miscellaneous';
 
 function ResRow(props) {
   const navigate = useNavigate();
-  const { e, userId } = props;
-
-  const isUserAuthenticated = userId !== undefined;  // Verifica se l'utente è autenticato
+  const { e } = props;
 
   return (
     <tr>
@@ -27,7 +25,7 @@ function ResRow(props) {
             props.setLoading(true);
             props.showPackages(e.id);
             navigate(`/restaurants/${e.id}`); }}
-          disabled={!isUserAuthenticated}
+          disabled={props.user?.id? false : true}  
         >
           Entra nel negozio!
         </Button>
@@ -38,6 +36,8 @@ function ResRow(props) {
 
 
 function MainRestaurants(props) {
+
+  const { showBookings } = props;
   
   const navigate = useNavigate();
 
@@ -75,7 +75,7 @@ function MainRestaurants(props) {
               <tr>
                 <th>Nome
                   {/*Vicino a stringa "Nome" piazzo il tag "i" che in base al valore dello stato sortOrder cambia disengo. Al click del disegno, chiama la funzione sortByScore che si occupa della modifica dello stato*/}
-                  <i className={'mx-1 '+(sortOrder ==='asc' ? 'bi bi-sort-alpha-up' : 'bi bi-sort-alpha-down')} onClick={sortByName} style={{color: 'black'}}/>
+                  <i className={'mx-1 '+(sortOrder ==='asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up')} onClick={() => sortByName()} style={{color: 'black'}}/>
                 </th>
                 <th>Indirizzo</th>
                 <th>Numero di telefono</th>
@@ -85,7 +85,7 @@ function MainRestaurants(props) {
             </thead>
             <tbody>
               {restaurantsList.map((restaurant) =>
-                <ResRow e={restaurant} userId={props.user && props.user.id} key={restaurant.id} showPackages={props.showPackages} setLoading={props.setLoading}/>)
+                <ResRow e={restaurant} user={props.user} key={restaurant.id} showPackages={props.showPackages} setLoading={props.setLoading}/>)
               }
             </tbody>
           </Table>
@@ -93,7 +93,11 @@ function MainRestaurants(props) {
       </Row>
       <Row>
         <Col>
-        <Button variant='secondary' onClick={()=>navigate('/bookings')} disabled={props.user?.id? false : true}> Le mie prenotazioni </Button>
+        <Button variant='secondary' onClick={() => {
+          props.setLoading(true);
+          showBookings(); 
+          navigate('/bookings'); }}  
+          disabled={props.user?.id? false : true}> Le mie prenotazioni </Button>
         </Col>
       </Row>
     </>

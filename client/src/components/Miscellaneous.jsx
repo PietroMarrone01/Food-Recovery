@@ -70,18 +70,10 @@ function LoginForm(props) {
       setErrorMessage('');
       const credentials = { username, password };  // Username e password prese direttamente dallo stato
     
-      /** VALIDAZIONE: Verifica che lo username sia un indirizzo email valido 
-       *   ^[^\s@]+: verifica che ci sia almeno un carattere all'inizio dell'indirizzo email e che non sia uno spazio o il simbolo "@".
-       *   @[^\s@]+: verifica la presenza del simbolo "@" seguito da almeno un carattere che non sia uno spazio o il simbolo "@".
-       *   \.[^\s@]+$: verifica che ci sia un punto seguito da almeno un carattere che non sia uno spazio o il simbolo "@" alla fine dell'indirizzo email.
-       */ 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
       let valid = true;
       
-      if (!emailRegex.test(username)) {
-        valid = false;
-        setErrorMessage('Il campo username deve contenere un indirizzo email valido.');
-      } else if (username === '' || password === '') {
+      if (username === '' || password === '') {
         valid = false;
         setErrorMessage('I campi username e/o password non possono essere vuoti.');
       }
@@ -147,7 +139,7 @@ function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
  * @param id l'identificatore univoco per il pacchetto
  * @param restaurantId l'identificatore del ristorante a cui il pacchetto appartiene
  * @param restaurantName il nome del ristorante
- * @param isSurprisePackage indica se il pacchetto è una sorpresa (0 per pacchetto normale, 1 per sorpresa)
+ * @param surprisePackage indica se il pacchetto è una sorpresa (0 per pacchetto normale, 1 per sorpresa)
  * @param content la descrizione o il contenuto del pacchetto
  * @param price il prezzo del pacchetto
  * @param size la dimensione o quantità del pacchetto
@@ -155,7 +147,7 @@ function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
  * @param endTime l'ora di fine prelievo del pacchetto
  * @param availability indica se il pacchetto è disponibile (0 per false, 1 per true)
  */
-function Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability) {
+function Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, removedItems) {
   this.id = id;
   this.restaurantId = restaurantId;
   this.restaurantName = restaurantName;
@@ -166,6 +158,7 @@ function Package(id, restaurantId, restaurantName, surprisePackage, content, pri
   this.startTime = startTime;
   this.endTime = endTime;
   this.availability = availability;
+  this.removedItems = removedItems;
 }
 
 export {NavHeader, LoginForm, Restaurant, Package};

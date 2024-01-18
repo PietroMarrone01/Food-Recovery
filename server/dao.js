@@ -61,6 +61,7 @@ exports.listPackagesForRestaurant = (restaurantId) => {
 
 
 // ottieni tutte le prenotazioni per un utente
+/** 
 exports.listBookingsForUser = (userId) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM bookings WHERE user_id = ?';
@@ -78,6 +79,59 @@ exports.listBookingsForUser = (userId) => {
     });
   });
 };
+*/
+
+exports.listBookingsForUser = (userId) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT b.id AS booking_id, b.user_id, b.package_ids,
+             p.id AS package_id, p.restaurant_name, p.surprise_package,
+             p.price, p.size, p.start_time AS package_start_time, p.end_time AS package_end_time
+      FROM bookings AS b
+      JOIN booking_packages AS bp ON b.id = bp.booking_id
+      JOIN packages AS p ON bp.package_id = p.id
+      WHERE b.user_id = ?
+    `;
+
+    db.all(sql, [userId], (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      const bookings = {};
+      rows.forEach((row) => {
+        const bookingId = row.booking_id;
+
+        if (!bookings[bookingId]) {
+          // Se è la prima volta che troviamo questa prenotazione, creiamo un nuovo oggetto
+          bookings[bookingId] = {
+            id: bookingId,
+            user_id: row.user_id,
+            package_ids: JSON.parse(row.package_ids),
+            packages: [],
+          };
+        }
+
+        // Aggiungiamo le informazioni del pacchetto all'array "packages"
+        bookings[bookingId].packages.push({
+          id: row.package_id,
+          restaurant_name: row.restaurant_name,
+          surprise_package: row.surprise_package,
+          price: row.price,
+          size: row.size,
+          package_start_time: dayjs(row.package_start_time),
+          package_end_time: dayjs(row.package_end_time),
+        });
+      });
+
+      // Convertemo l'oggetto in un array per ottenere il risultato finale
+      const result = Object.values(bookings);
+      resolve(result);
+    });
+  });
+};
+
 
 
 // controlla la disponibilità dei pacchetti. Ritorna 0 se tutti i pacchetti sono disponibili, altrimenti torna gli id dei pacchetti non disponibili
@@ -98,8 +152,8 @@ exports.checkPackageAvailability = (packageIds) => {
       //"!availablePackages.some(pkg => pkg.id === id)" ritorna vera se nessun pacchetto in availablePackages ha un ID uguale a id.
       const unavailablePackages = packageIds.filter(id => !availablePackages.some(pkg => pkg.id === id));
       
-      //restituisce gli id dei pacchetti non disponibili o, se tutti disponibili, il numero dei pacchetti del carrello
-      resolve(unavailablePackages.length > 0 ? unavailablePackages : 0);
+      //restituisce gli id dei pacchetti non disponibili o, se tutti disponibili, ritorna 0
+      resolve(unavailablePackages.length > 0 ? unavailablePackages.length : 0);
     });
   });
 };
@@ -108,23 +162,37 @@ exports.checkPackageAvailability = (packageIds) => {
 // Crea una nuova prenotazione per un utente
 exports.createBooking = (userId, packageIds) => {
   return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO bookings(user_id, package_ids) VALUES (?, ?)';
-    
+    const sqlInsertBooking = 'INSERT INTO bookings(user_id, package_ids) VALUES (?, ?)'; 
+    const sqlUpdateAvailability = 'UPDATE packages SET availability = 0 WHERE id = ?';
+
     // Concatenazione degli ID dei pacchetti in una stringa separata da virgole
     const concatenatedPackageIds = packageIds.join(',');
 
     // Esecuzione dell'inserimento della prenotazione
-    db.run(sql, [userId, concatenatedPackageIds], function (err) {
+    db.run(sqlInsertBooking, [userId, concatenatedPackageIds], function (err) {
       if (err) {
         reject(err);
         return;
       }
 
       // Restituisce l'ID dell'ultima prenotazione inserita
-      resolve(this.lastID);
+      const bookingId = this.lastID;
+
+      // Aggiorna l'availability a 0 per i pacchetti prenotati
+      packageIds.forEach((packageId) => {
+        db.run(sqlUpdateAvailability, [packageId], (err) => {
+          if (err) {
+            console.error('Errore durante l\'aggiornamento dell\'availability:', err);
+            // Puoi gestire l'errore in base alle tue esigenze
+          }
+        });
+      });
+
+      resolve(bookingId);
     });
   });
 };
+
 
 
 // elimina una prenotazione per un utente

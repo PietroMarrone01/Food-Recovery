@@ -41,7 +41,7 @@ async function getPackagesForRestaurant(restaurantId) {
     throw packages;
   }
 }
-
+/** 
 async function getAllBookings() {
   const response = await fetch(`${URL}/bookings`, {credentials: 'include',});
   const bookings = await response.json();
@@ -55,29 +55,62 @@ async function getAllBookings() {
   } else {
     throw bookings;
   }
-}
+}*/
 
-//da sistemare
+async function getAllBookings() {
+  try {
+    const response = await fetch(`${URL}/bookings`, { credentials: 'include' });
+    const detailedBookings = await response.json();
 
-async function createBooking(packageIds) {
-  const response = await fetch(`${URL}/booking`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ packageIds }),
-  });
-
-  if (response.ok) {
-    return await response.json();
-  } else {
-    throw await response.json();
+    if (response.ok) {
+      return detailedBookings.map((booking) => ({
+        id: booking.id,
+        userId: booking.userId,
+        packageIds: booking.packageIds,
+        packages: booking.packages.map((p) => ({
+          id: p.id,
+          restaurantName: p.restaurantName,
+          surprisePackage: p.surprisePackage,
+          price: p.price,
+          size: p.size,
+          packageStartTime: p.packageStartTime,
+          packageEndTime: p.packageEndTime,
+        })),
+      }));
+    } else {
+      throw detailedBookings;
+    }
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    throw { error: 'Errore durante il recupero delle prenotazioni' };
   }
 }
 
-
-
+export function createBooking(packageIds) {
+  return new Promise((resolve, reject) => {
+    fetch(`${URL}/bookings`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ packageIds }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json()
+            .then((bookingId) => resolve(bookingId))
+            .catch(() => reject({ error: 'Cannot parse server response.' }));
+        } else {
+          // Analyze the cause of error
+          response.json()
+            .then((errorMessage) => reject(errorMessage))
+            .catch(() => reject({ error: 'Cannot parse server response.' }));
+        }
+      })
+      .catch(() => reject({ error: 'Cannot communicate with the server.' }));
+  });
+}
 
 function deleteBooking(bookingId) {
   return new Promise((resolve, reject) => {

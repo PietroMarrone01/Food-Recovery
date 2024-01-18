@@ -106,7 +106,7 @@ app.get('/api/restaurants/:id/packages', isLoggedIn, async (req, res) => {
     if(packages.error)
       res.status(404).json(packages);
     else
-      setTimeout(()=>res.json(packages), answerDelay); 
+      res.json(packages); 
   } catch (err) {
     console.log(err);
     res.status(500).end();
@@ -114,6 +114,7 @@ app.get('/api/restaurants/:id/packages', isLoggedIn, async (req, res) => {
 });
 
 // GET /api/bookings - AUTH 
+/** 
 app.get('/api/bookings', isLoggedIn, async (req, res) => {
   const userId = req.user.id;
   try {
@@ -126,38 +127,80 @@ app.get('/api/bookings', isLoggedIn, async (req, res) => {
     console.log(err);
     res.status(500).end();
   }
-});
+});*/
 
-/** 
-// POST /api/booking - AUTH 
-app.post('/api/booking', isLoggedIn, [
-  body('packageIds').isArray().notEmpty().withMessage('Devi fornire almeno un pacchetto nel carrello.').bail(),
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const packageIds = req.body.packageIds;
+// GET /api/bookings - AUTH 
+app.get('/api/bookings', isLoggedIn, async (req, res) => {
+  const userId = req.user.id;
 
   try {
-    // Controlla la disponibilità dei pacchetti
-    const availabilityResult = await dao.checkPackageAvailability(packageIds);
+    const bookings = await dao.listBookingsForUser(userId);
 
-    if (availabilityResult === 0) {
-      // Tutti i pacchetti sono disponibili, procedi con la creazione della prenotazione
-      const bookingResult = await dao.createBooking(req.user.id, packageIds);
-      res.status(201).json(bookingResult);
-    } else {
-      // Almeno uno dei pacchetti non è disponibile, restituisci un messaggio di errore con gli id dei pacchetti non disponibili
-      res.status(400).json({ error: 'Almeno uno dei pacchetti nel carrello non è più disponibile.', unavailablePackages: availabilityResult });
+    if (bookings.error) {
+      res.status(404).json(bookings);
+      return;
     }
+
+    // Adatta la risposta in base al formato desiderato
+    const detailedBookings = bookings.map((booking) => ({
+      id: booking.id,
+      userId: booking.user_id,
+      packageIds: booking.package_ids,
+      packages: booking.packages.map((p) => ({
+        id: p.id,
+        restaurantName: p.restaurant_name,
+        surprisePackage: p.surprise_package,
+        price: p.price,
+        size: p.size,
+        packageStartTime: p.package_start_time,
+        packageEndTime: p.package_end_time,
+      })),
+    }));
+
+    setTimeout(() => res.json(detailedBookings), answerDelay);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Errore durante la verifica della disponibilità dei pacchetti o la creazione della prenotazione.' });
+    console.log(err);
+    res.status(500).end();
   }
 });
- */
+
+
+// Middleware per la validazione usato nella POST
+const validateBooking = [
+  check('packageIds').isArray(),
+];
+
+// POST /api/booking - AUTH 
+app.post('/api/bookings', isLoggedIn, validateBooking, async (req, res) => {
+  
+  const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+  const { packageIds } = req.body;
+  const userId = req.user.id;
+  
+  try {
+    // Controlla la disponibilità dei pacchetti
+    const unavailablePackages = await dao.checkPackageAvailability(packageIds);
+
+    if (unavailablePackages !== 0) {
+      // Alcuni pacchetti non sono disponibili
+      res.status(400).json({ error: 'Alcuni pacchetti non sono più disponibili', unavailablePackages });
+      return;
+    }
+
+    // Tutti i pacchetti sono disponibili, crea la prenotazione
+    const bookingId = await dao.createBooking(userId, packageIds);
+
+    res.status(200).json({ success: true, bookingId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Errore durante la creazione della prenotazione' });
+  }
+});
+ 
 
 // DELETE /api/booking/:id - AUTH 
 app.delete('/api/bookings/:id', isLoggedIn, async (req, res) => {
