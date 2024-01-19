@@ -165,14 +165,10 @@ app.get('/api/bookings', isLoggedIn, async (req, res) => {
 });
 
 
-// Middleware per la validazione usato nella POST
-const validateBooking = [
-  check('packageIds').isArray(),
-];
-
 // POST /api/booking - AUTH 
-app.post('/api/bookings', isLoggedIn, validateBooking, async (req, res) => {
-  
+app.post('/api/bookings', isLoggedIn, [
+  check('packageIds').isArray(),], async (req, res) => {
+
   const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
@@ -185,16 +181,17 @@ app.post('/api/bookings', isLoggedIn, validateBooking, async (req, res) => {
     // Controlla la disponibilità dei pacchetti
     const unavailablePackages = await dao.checkPackageAvailability(packageIds);
 
-    if (unavailablePackages !== 0) {
+    if (unavailablePackages.length !== 0) {
       // Alcuni pacchetti non sono disponibili
-      res.status(400).json({ error: 'Alcuni pacchetti non sono più disponibili', unavailablePackages });
+      console.log(unavailablePackages);
+      res.json(unavailablePackages);
       return;
     }
 
     // Tutti i pacchetti sono disponibili, crea la prenotazione
     const bookingId = await dao.createBooking(userId, packageIds);
 
-    res.status(200).json({ success: true, bookingId });
+    res.json(bookingId);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Errore durante la creazione della prenotazione' });

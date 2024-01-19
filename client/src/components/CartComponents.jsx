@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, Outlet, useNavigate, useParams } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
 import Alert from 'react-bootstrap/Alert';
+import '../mycss.css';
 
 
 function CartItem(props) {
-  const { p, cartItems, i, removeFromCart, updateCart } = props;
+  const { p, cartItems, i, removeFromCart, updateCart, highlightUnavailable } = props;
 
   const startTime = p.startTime.format('HH:mm');
   const endTime = p.endTime.format('HH:mm');
@@ -50,7 +51,7 @@ function CartItem(props) {
                 variant="outline-danger"
                 size="sm"
                 onClick={() => handleRemoveType(index)}
-                disabled={updatedP.content.length === 1 || cartItems[i].removedItems >= 2}
+                disabled={updatedP.content.length === 1 || cartItems[i].removedItems >= 2 || highlightUnavailable}
               >
                 -
               </Button>
@@ -63,8 +64,11 @@ function CartItem(props) {
     }
   };
 
+  //determinare se l'elemento deve essere contrassegnato come non disponibile (per evidenziarlo per 5 secondi).
+  const isUnavailable = highlightUnavailable && cartItems.some(item => item.id === p.id);
+
   return (
-    <div className="d-flex justify-content-between align-items-center mb-2">
+    <div className={`d-flex justify-content-between align-items-center mb-2 ${isUnavailable ? 'highlighted' : ''}`}>
       <div>
         <strong>{updatedP.restaurantName}</strong> - {renderPackageType()}
         <div>{renderContent()}</div>
@@ -74,7 +78,7 @@ function CartItem(props) {
           Orario prelievo: {startTime} - {endTime}
         </div>
       </div>
-      <Button variant="danger" size="sm" onClick={() => removeFromCart(updatedP)}>
+      <Button variant="danger" size="sm" onClick={() => removeFromCart(updatedP)} disabled={highlightUnavailable}>
         Rimuovi
       </Button>
     </div>
@@ -86,7 +90,7 @@ function CartModal(props) {
 
     const navigate = useNavigate();
     
-    const { cartItems, hideCart, removeFromCart, updateCart, handleConfirm  } = props;
+    const { cartItems, hideCart, removeFromCart, updateCart, handleConfirm, highlightUnavailable  } = props;
 
     // Calcola il prezzo totale sommando i prezzi di tutti gli elementi nel carrello
     const totalAmount = cartItems.reduce((total, item) => total + item.price, 0);
@@ -97,11 +101,15 @@ function CartModal(props) {
           <Modal.Title>Il tuo carrello</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {highlightUnavailable? 
           <Alert variant="danger" className="mb-3">
+            Prenotazione non confermata. I seguenti pacchetti sono stati nel frattempo prenotati da altri utenti. 
+          </Alert> : 
+          <Alert variant="warning" className="mb-3">
             E' possibile rimuovere fino ad un massimo di due tipi di cibo per pacchetto. I pacchetti con un solo tipo di cibo rimanente non possono essere svuotati.
-          </Alert>
+          </Alert>}
           {cartItems.map((item, index) => (
-            <CartItem key={item.id} p={item} cartItems={cartItems} i={index} removeFromCart={removeFromCart} updateCart={updateCart}/>
+            <CartItem key={item.id} p={item} cartItems={cartItems} i={index} removeFromCart={removeFromCart} updateCart={updateCart} highlightUnavailable={highlightUnavailable}/>
           ))}
         </Modal.Body>
         <Modal.Footer>
@@ -132,7 +140,8 @@ function Cart(props) {
         </Button>
 
         {showCart? <CartModal cartItems={cartItems} hideCart={hideCart} 
-        removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}/> : null}
+        removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}
+        highlightUnavailable={props.highlightUnavailable}/> : null}
         
       </div>
     );

@@ -1,0 +1,14 @@
+.highlighted {
+    background-color: #f8d7da; /* Rosso chiaro simile alla variante danger di un Alert */
+    color: #212529; /* Nero */
+    border: 1px solid #f5c6cb; /* Un bordo leggermente più scuro per definire il contorno */
+    padding: 8px; /* Aggiungi spazio intorno al testo per una migliore leggibilità */
+    border-radius: 4px; /* Bordo arrotondato per uno stile più moderno */
+    transition: background-color 0.3s, color 0.3s; /* Aggiungi una transizione per una transizione più fluida */
+  }
+  
+  .highlighted:hover {
+    background-color: #dc3545; /* Cambia il colore al passaggio del mouse per un feedback visivo */
+    color: #fff; /* Cambia il colore del testo a bianco al passaggio del mouse */
+  }
+  

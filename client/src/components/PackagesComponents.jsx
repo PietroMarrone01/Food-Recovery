@@ -58,7 +58,7 @@ function PackageRow(props) {
       <td>{renderAvailability()}</td>
       <td>
         <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
-        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
+        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 }>
           Aggiungi al carrello
         </Button>
       </td>
@@ -79,7 +79,15 @@ function PackagesList(props) {
     return new Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, 0);
   });
 
-  //console.log(packagesList);
+  // Funzione per contare il numero di oggetti con availability = 0
+  function countAvailabilityZero(packagesList) {
+    return packagesList.filter(p => p.availability === 0).length;
+  }
+  
+  // Funzione per contare il numero di oggetti con availability = 1
+  function countAvailabilityOne(packagesList) {
+    return packagesList.filter(p => p.availability === 1).length;
+  }
 
   return (
     props.loading? <LoadingSpinner /> : 
@@ -96,6 +104,8 @@ function PackagesList(props) {
       <Row>
         <Col className="mt-3">
           <p className='fw-bold'>Pacchetti a disposizione nel ristorante: {packagesList[0].restaurantName}</p>
+          <p>Numero pacchetti disponibili: {countAvailabilityOne(packagesList)}</p>
+          <p>Numero pacchetti non disponibili: {countAvailabilityZero(packagesList)}</p>
         </Col>
       </Row>
       <Row>

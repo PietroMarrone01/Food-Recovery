@@ -38,6 +38,10 @@ function RestaurantRoute(props) {
     return (
       <>
         <NavHeader user={props.user} logout={props.logout} />
+        {props.bookingSuccess? ( //stampa messaggio di successo se la prenotazione è comfermata
+        <Alert variant="success" className="my-2 text-center">
+          Prenotazione confermata con successo!
+        </Alert> ) : null}
         {props.user? //se l'utente è loggato, mostro la lista dei ristoranti + il carrello
         <Container fluid>
           {props.errorMsg? 
@@ -49,7 +53,8 @@ function RestaurantRoute(props) {
             </Col>
             <Col md={1}>
               <Cart cartItems = {props.cartItems} showCart={props.showCart} setShowCart={props.setShowCart}
-              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}/>
+              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}
+              highlightUnavailable={props.highlightUnavailable}/>
             </Col>
           </Row>) }
         </Container> : //se utente non è loggato mostro solo lista dei ristoranti
@@ -61,8 +66,6 @@ function RestaurantRoute(props) {
         </Container>
         }
       </>
-        
-      
     );
 }
 
@@ -83,7 +86,8 @@ function PackageRoute(props) {
             </Col>
             <Col md={1}>
               <Cart cartItems = {props.cartItems} showCart={props.showCart} setShowCart={props.setShowCart}
-              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}/>
+              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}
+              highlightUnavailable={props.highlightUnavailable}/>
             </Col> 
           </Row>) }
       </Container> 
@@ -106,7 +110,8 @@ function BookingRoute(props) {
             </Col>
             <Col md={1}>
               <Cart cartItems = {props.cartItems} showCart={props.showCart} setShowCart={props.setShowCart}
-              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}/>
+              removeFromCart={props.removeFromCart} updateCart={props.updateCart} handleConfirm={props.handleConfirm}
+              highlightUnavailable={props.highlightUnavailable}/>
             </Col> 
           </Row>) }
       </Container> 

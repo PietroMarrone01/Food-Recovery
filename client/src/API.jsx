@@ -96,21 +96,23 @@ export function createBooking(packageIds) {
       },
       body: JSON.stringify({ packageIds }),
     })
-      .then((response) => {
-        if (response.ok) {
-          response.json()
-            .then((bookingId) => resolve(bookingId))
-            .catch(() => reject({ error: 'Cannot parse server response.' }));
-        } else {
-          // Analyze the cause of error
-          response.json()
-            .then((errorMessage) => reject(errorMessage))
-            .catch(() => reject({ error: 'Cannot parse server response.' }));
-        }
-      })
-      .catch(() => reject({ error: 'Cannot communicate with the server.' }));
-  });
+    .then((response) => {
+      if (response.ok) {
+        response.json()
+          .then((answer) => resolve(answer))
+          .catch(() => reject({ error: 'Cannot parse server response.' }));
+      } else {
+        // Analyze the cause of error
+        response.json()
+          .then((errorMessage) => reject(errorMessage))
+          .catch(() => reject({ error: 'Cannot parse server response.' }));
+      }
+    })
+    .catch(() => reject({ error: 'Cannot communicate with the server.' }));
+});
 }
+
+
 
 function deleteBooking(bookingId) {
   return new Promise((resolve, reject) => {

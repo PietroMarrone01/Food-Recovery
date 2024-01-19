@@ -153,7 +153,7 @@ exports.checkPackageAvailability = (packageIds) => {
       const unavailablePackages = packageIds.filter(id => !availablePackages.some(pkg => pkg.id === id));
       
       //restituisce gli id dei pacchetti non disponibili o, se tutti disponibili, ritorna 0
-      resolve(unavailablePackages.length > 0 ? unavailablePackages.length : 0);
+      resolve(unavailablePackages.length > 0 ? unavailablePackages : []);
     });
   });
 };
@@ -183,7 +183,6 @@ exports.createBooking = (userId, packageIds) => {
         db.run(sqlUpdateAvailability, [packageId], (err) => {
           if (err) {
             console.error('Errore durante l\'aggiornamento dell\'availability:', err);
-            // Puoi gestire l'errore in base alle tue esigenze
           }
         });
       });
