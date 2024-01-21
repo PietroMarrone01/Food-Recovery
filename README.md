@@ -19,6 +19,8 @@
 
 - Metodo: GET
 
+- Autorizzazione: autenticazione non richiesta
+
 - Descrizione: Ottieni un elenco di tutti i ristoranti.
 
 - Corpo della Richiesta: Nessuno
@@ -43,6 +45,8 @@
 - URL: /api/restaurants/:id/packages
 
 - Metodo: GET
+
+- Autorizzazione: Richiesta autenticazione
 
 - Descrizione: Ottieni un elenco dei pacchetti offerti dal ristorante identificato dall'id :id.
 
@@ -77,18 +81,51 @@
 
 - Metodo: GET
 
-- Descrizione: 
+- Autorizzazione: Richiesta autenticazione
+
+- Descrizione: Ottieni un elenco delle prenotazioni effettuate dall'utente autenticato.
 
 - Corpo della Richiesta: Nessuno
 
 - Risposta:
+  - 200 OK (successo) con un array di oggetti che descrivono le prenotazioni dell'utente.
+  - 404 Not Found 
+  - 500 Errore Interno del Server (errore generico).
 
-- Corpo della Risposta: Un array di oggetti, ognuno che descrive una prenotazione.
+- Corpo della Risposta (Esempio Successo):
 ```
-{
-    
-}
+[
+  {
+    "id": 15,
+    "user_id": 4,
+    "package_ids": [1, 12, 8],
+    "packages": [
+      {
+        "id": 1,
+        "restaurant_id": 1,
+        "restaurant_name": "Panificio del Gusto",
+        "surprise_package": false,
+        "price": 12.99,
+        "size": "Piccola",
+        "start_time": "2024-01-25 10:30:00",
+        "end_time": "2024-01-25 17:00:00",
+        "availability": true
+      },
+      // Altri pacchetti...
+    ]
+  },
+  // Altre prenotazioni...
+]
 ```
+
+- Corpo della Risposta (Esempio Nessuna Prenotazione):
+```
+[]
+```
+
+- Errori Possibili:
+   - 401 Unauthorized: L'autenticazione dell'utente non è valida.
+   - 500 Internal Server Error: Errore generico durante il recupero delle prenotazioni dell'utente.
 
 ### __4. Crea Prenotazione__
 
@@ -132,21 +169,37 @@ packageIds: Array di ID dei pacchetti
 
 ### __5. Eliminazione di una prenotazione__
 
-- URL: /api/
+- URL: /api/bookings/:id
 
 - Metodo: DELETE
 
-- Descrizione: 
+- Autorizzazione: Richiesta autenticazione
 
-- Corpo della Richiesta: 
+- Descrizione: Elimina la prenotazione identificata dall'ID :id per l'utente autenticato.
+
+- Parametri dell'URL:
+   - :id (obbligatorio) - L'ID della prenotazione da eliminare.
+   
+- Corpo della Richiesta: Nessuno
 
 - Risposta:
+   - 200 OK (successo) con il numero di righe interessate dalla cancellazione.
+   - 401 Unauthorized: L'autenticazione dell'utente non è valida.
+   - 503 Service Unavailable: Errore del database durante l'eliminazione della prenotazione.
 
-- Corpo della Risposta: 
+- Corpo della Risposta (Esempio Successo):
 ```
 {
-    
+   1 
 }
+```
+
+- Corpo della Risposta (Esempio Errore del Database):
+```
+{
+  "error": "Database error during the deletion of booking :id."
+}
+
 ```
 
 ### __6. Creare una nuova sessione (login)__
@@ -306,6 +359,7 @@ packageIds: Array di ID dei pacchetti
 - **Descrizione:** Mostra l'elenco delle prenotazioni dell'utente.
 - **Proprietà:**
   - `bookings`: Lista delle prenotazioni da visualizzare.
+  - `deleteBooking`: Funzione per eliminare una prenotazione
 
 ### 6. Componente NavHeader
 

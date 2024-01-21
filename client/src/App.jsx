@@ -181,7 +181,7 @@ function App() {
           .then(b => {
             setBookings(b);
             setLoading(false);
-            console.log(bookings);
+            //console.log(bookings);
           })
         }
         catch (err) {
