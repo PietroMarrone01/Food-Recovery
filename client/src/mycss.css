@@ -1,3 +1,4 @@
+/*Utilizzato per mostrare quali sono i pacchetti del carrello non più disponibili in seguito a prenotazione cancellata*/
 .highlighted {
     background-color: #f8d7da; /* Rosso chiaro simile alla variante danger di un Alert */
     color: #212529; /* Nero */
@@ -11,4 +12,12 @@
     background-color: #dc3545; /* Cambia il colore al passaggio del mouse per un feedback visivo */
     color: #fff; /* Cambia il colore del testo a bianco al passaggio del mouse */
   }
+
+/*Utilizzato per il colore del bottone del carrello*/
+.button-light-blue {
+  background-color: #ADD8E6;
+  border-color: #ADD8E6;
+  color: #000; /* Colore del testo, puoi adattarlo in base alle tue esigenze */
+}
+
   

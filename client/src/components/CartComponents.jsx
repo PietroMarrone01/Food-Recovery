@@ -11,9 +11,10 @@ function CartItem(props) {
   const startTime = p.startTime.format('HH:mm');
   const endTime = p.endTime.format('HH:mm');
 
-  /** Variabile di stato locale per memorizzare il pacchetto aggiornato e utilizzarla nella parte di rendering. 
-   * Per tenere traccia del numero di elementi rimossi nel tuo componente, estendo lo stato locale aggiungendo una proprietà removedItems. 
-   * La inizializzo a 0 e la incremento ogni volta che rimuovo un elemento dal contenuto del pacchetto.
+  /** 
+   * Variabile di stato locale per memorizzare il pacchetto aggiornato. 
+   * Proprietà removedItems (usata per tenere traccia del numero di tipi di cibo rimossi nel pacchetto) è inizializzata a 0. 
+   * e la incremento ogni volta che rimuovo un tipo di cibo dal contenuto del pacchetto.
   */
   const [updatedP, setUpdatedP] = useState(p);
 
@@ -23,6 +24,8 @@ function CartItem(props) {
 
   /** Funzione per la visualizzazione del contenuto del pacchetto nel carrello (che garantisce aggiornamento del contenuto) */
   const renderContent = () => {
+
+    //funzione definita all'interno di renderContent che mi gestisce rimozione dei tipi di cibo
     const handleRemoveType = (index) => {
       // Clona l'oggetto content, rimuovendo l'elemento specificato dall'indice
       const newContent = [...updatedP.content];
@@ -135,7 +138,7 @@ function Cart(props) {
   
     return (
       <div className="text-center my-3">
-        <Button variant="danger" onClick={() => setShowCart(true)}>
+        <Button className="button-light-blue" onClick={() => setShowCart(true)}>
           Visualizza il carrello ({cartItems.length})
         </Button>
 

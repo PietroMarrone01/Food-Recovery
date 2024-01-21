@@ -58,7 +58,7 @@ function PackageRow(props) {
       <td>{renderAvailability()}</td>
       <td>
         <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
-        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 }>
+        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
           Aggiungi al carrello
         </Button>
       </td>
@@ -74,6 +74,10 @@ function PackagesList(props) {
 
   const { resId } = useParams();
 
+  /**
+   * Creo un array di oggetti di tipo Package. 
+   * Setto a 0 il campo "removedItems" --> sarà incrementato quando elimino un tipo di cibo da un pacchetto presente nel carrello 
+   **/
   const packagesList = props.packages.map((p) => {
     const { id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability} = p;
     return new Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, 0);

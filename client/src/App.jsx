@@ -29,9 +29,12 @@ function App() {
   /** Lista delle prenotazioni */
   const [bookings, setBookings] = useState([]);
 
+  /** Stato per gestire la ricarica delle prenotazioni quando ne viene eliminata una (si entra in uno stato "sporco") */
+  const [dirty, setDirty] = useState(false);
+
   /** Stati per gestire 
-   * - messaggio di successo in caso di prenotazione confermata 
-   * - messaggio di avviso + pacchetti già prenotati da evidenziare 
+   * - messaggio di successo in caso di prenotazione confermata --> usato nella useEffect
+   * - messaggio di avviso + pacchetti già prenotati da evidenziare --> usato nella useEffect
    **/
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [highlightUnavailable, setHighlightUnavailable] = useState(false);
@@ -62,7 +65,7 @@ function App() {
 
   /** 
    * UseEffect aggiuntiva che faccio partire al mount dell'applicazione e che mi controlla, quando ricarico l'applicazione, 
-   * se sono già loggato (se c'è già un cookie valido). così evito di dover rifare l'autenticazione. 
+   * se sono già loggato (se c'è già un cookie valido). Così evito di dover rifare l'autenticazione. 
    */
   useEffect(()=> {
     const checkAuth = async() => {
@@ -77,11 +80,13 @@ function App() {
     checkAuth();
   }, []);
 
+  /**
+   * UseEffect usata per ricaricare all'inizio la lista di tutti i ristoranti.
+   */
   useEffect(() => {
     API.getAllRestaurants()
       .then(resList => {
         setRestaurants(resList);
-        // Loading done
         setLoading(false);
       })
       .catch(e => { 
@@ -89,7 +94,10 @@ function App() {
       } );
   }, []);
 
-  /** Usata per mostrare un messaggio di successo all'utente in seguito alla conferma della prenotazione e farlo scomparire automaticamente. */
+  /** 
+   * Usata per mostrare un messaggio di successo all'utente in seguito alla conferma della prenotazione e farlo scomparire automaticamente. 
+   * Stato bookingSuccess modificato da funzione handleConfirm chiamata nel momento in cui si preme il bottone per la conferma del carrello. 
+  */
   useEffect(() => {
     if (bookingSuccess) {
       const timeout = setTimeout(() => {
@@ -99,7 +107,10 @@ function App() {
     }
   }, [bookingSuccess]);
   
-  /** Usata per mostrare un messaggio di avviso all'utente in seguito alla prenotazione non andata a buon fine + pacchetti già prenotati da evidenziare*/
+  /** 
+   * Usata per mostrare un messaggio di avviso all'utente in seguito alla prenotazione non andata a buon fine + pacchetti già prenotati da evidenziare
+   * Stato highlightUnavailable modificato da funzione handleConfirm chiamata nel momento in cui si preme il bottone per la conferma del carrello. 
+   **/
   useEffect(() => {
     if (highlightUnavailable) {
       const timeout = setTimeout(() => {
@@ -111,6 +122,21 @@ function App() {
       return () => clearTimeout(timeout);  //gestire la pulizia del timeout nel caso in cui il componente venga smontato o aggiornato prima che il timeout scada.
     }
   }, [highlightUnavailable]);
+
+  /**
+   * Usata per ricaricare la lista delle prenotazioni nel momento in cui ne viene cancellata una. 
+   */
+  useEffect( () => {
+    if (dirty) {
+      API.getAllBookings()
+        .then((bookingList) => {
+          setBookings(bookingList);  
+          setDirty(false);           
+          setLoading(false);   
+        })
+        .catch((err) => handleError(err));
+    }
+  }, [dirty]);
    
 
   /** ---- FUNZIONI PER LA GESTIONE DEL LOGIN ---- */
@@ -146,15 +172,16 @@ function App() {
     }
   };
 
-    /** ---- FUNZIONE PER LA VISUALIZZAZIONE DELLE PRENOTAZIONI ---- 
-    const handleEnterBookings = async () => {
+    /** ---- FUNZIONE PER LA GESTIONE DELLE PRENOTAZIONI ---- */
+    // Mostra tutte le prenotazioni
+    const handleShowBookings = async () => {
       if (loggedIn) {
         try {
           API.getAllBookings()
           .then(b => {
             setBookings(b);
             setLoading(false);
-            //console.log(b);
+            console.log(bookings);
           })
         }
         catch (err) {
@@ -163,11 +190,22 @@ function App() {
       }
     };
 
-    */
+    //Elimina una prenotazione
+    const handleDeleteBooking = async (bookingId) => {
+      if (loggedIn) {
+        try {
+          //MAP che aggiunge "status: deleted" solamente su riga che deve essere cancellata. Vado poi a fare la cancellazione su DB utilizzando API.deleteBooking
+          setBookings((oldBookings) => oldBookings.map(e => e.id !== bookingId ? e : Object.assign({}, e, {status: 'deleted'}) ));
 
-    const handleEnterBookings = () => {
-      setLoading(false);
-    }
+          API.deleteBooking(bookingId)
+          .then(() => setDirty(true))
+        }
+        catch (err) {
+          handleError(err)
+        }
+      }
+    };
+
 
   /** ---- FUNZIONI PER LA GESTIONE DEL CARRELLO ---- */
   const addToCart = (p) => {
@@ -195,12 +233,12 @@ function App() {
   //Funzione chiamata quando confermo il carrello
   const handleConfirm = async () => {
     const packageIds = cartItems.map((item) => item.id);
-  
     try {
       const response = await API.createBooking(packageIds);
   
+      //API.createBooking può ritornare o l'ID della prenotazione confermata oppure un array con gli ID dei pacchetti che non sono più disponibili
       if (Array.isArray(response)) {
-        console.log('Alcuni pacchetti non sono più disponibili:', response);
+        //console.log('Alcuni pacchetti non sono più disponibili:', response);
         
         // Aggiorna lo stato cartItems mostrando solo i pacchetti non più disponibili
         const updatedCart = cartItems.filter((item) => response.includes(item.id));
@@ -231,18 +269,18 @@ function App() {
         <Route path='/' element={ <RestaurantRoute user={user} logout={doLogOut}  errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')}
           loading={loading} setLoading={setLoading} restaurants={restaurants} showPackages={handleEnterStore} 
           cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
-          removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} highlightUnavailable={highlightUnavailable}
-          showBookings={handleEnterBookings} bookingSuccess={bookingSuccess}/> } />
+          removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} highlightUnavailable={highlightUnavailable} bookingSuccess={bookingSuccess}
+          showBookings={handleShowBookings} /> } />
         
         <Route path='/restaurants/:resId' element={ <PackageRoute user={user} logout={doLogOut} errorMsg={errorMsg} resetErrorMsg={()=>setErrorMsg('')} 
           loading={loading} setLoading={setLoading} packages={packages} 
           cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
           addToCart={addToCart} removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} highlightUnavailable={highlightUnavailable}
           addedRestaurants={addedRestaurants}
-          showBookings={handleEnterBookings}/> } />
+          showBookings={handleShowBookings}/> } />
         
         <Route path='/bookings' element={ <BookingRoute user={user} logout={doLogOut} errorMsg={errorMsg} 
-          resetErrorMsg={()=>setErrorMsg('')} loading={loading} bookings={bookings}
+          resetErrorMsg={()=>setErrorMsg('')} loading={loading} bookings={bookings} deleteBooking={handleDeleteBooking}
           cartItems = {cartItems} showCart={showCart} setShowCart={setShowCart}
           removeFromCart={removeFromCart} updateCart={updateCart} handleConfirm={handleConfirm} highlightUnavailable={highlightUnavailable}/> } />
 

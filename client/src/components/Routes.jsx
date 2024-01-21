@@ -8,7 +8,7 @@ import {NavHeader} from './Miscellaneous';
 
 
 /**
- * Uno spinner di caricamento mostrato durante il primo caricamento dell'app
+ * Uno spinner di caricamento.
  */
 function LoadingSpinner() {
     return (
@@ -20,8 +20,9 @@ function LoadingSpinner() {
     );
   }
 
-
-/** Informs the user that the route is not valid */
+/** 
+ * Informa l'utente che la route non è valida 
+ */
 function NotFoundPage() {
   return (
     <Container className='App'>
@@ -34,6 +35,9 @@ function NotFoundPage() {
   )
 }
 
+/**
+ * Route per la visualizzazione dei ristoranti.
+ */
 function RestaurantRoute(props) {
     return (
       <>
@@ -69,7 +73,9 @@ function RestaurantRoute(props) {
     );
 }
 
-
+/**
+ * Route per la visualizzazione dei pacchetti.
+ */
 function PackageRoute(props) {
   return (
     <>
@@ -95,7 +101,9 @@ function PackageRoute(props) {
   );
 }
 
-
+/**
+ * Route per la visualizzazione delle prenotazioni. 
+ */
 function BookingRoute(props) {
   return (
     <>
@@ -106,7 +114,7 @@ function BookingRoute(props) {
           {props.loading ? ( <LoadingSpinner /> ) : 
           (<Row>
             <Col md={11}>
-              <BookingsList user={props.user} bookings={props.bookings} setShowCart={props.setShowCart} />
+              <BookingsList user={props.user} bookings={props.bookings} setShowCart={props.setShowCart} deleteBooking={props.deleteBooking}/>
             </Col>
             <Col md={1}>
               <Cart cartItems = {props.cartItems} showCart={props.showCart} setShowCart={props.setShowCart}

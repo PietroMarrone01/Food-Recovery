@@ -9,7 +9,7 @@ const db = new sqlite.Database('food_db.sqlite', (err) => {
   if(err) throw err;
 });
 
-// ottieni tutti i ristoranti
+/** Ottieni tutti i ristoranti */ 
 exports.listRestaurants = () => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM restaurants';
@@ -32,7 +32,7 @@ exports.listRestaurants = () => {
 };
 
 
-// ottieni i pacchetti per un ristorante specifico
+/** Ottieni i pacchetti per un ristorante specifico */
 exports.listPackagesForRestaurant = (restaurantId) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM packages WHERE restaurant_id = ?';
@@ -41,17 +41,17 @@ exports.listPackagesForRestaurant = (restaurantId) => {
         reject(err);
         return;
       }
-      const packages = rows.map((myPackage) => ({
-        id: myPackage.id,
-        restaurant_id: parseInt(myPackage.restaurant_id),
-        restaurant_name: myPackage.restaurant_name,
-        surprise_package: parseInt(myPackage.surprise_package),
-        content: myPackage.content ? JSON.parse(myPackage.content) : null,
-        price: myPackage.price,
-        size: myPackage.size,
-        start_time: dayjs(myPackage.start_time),
-        end_time: dayjs(myPackage.end_time),
-        availability: parseInt(myPackage.availability),
+      const packages = rows.map((p) => ({
+        id: p.id,
+        restaurant_id: parseInt(p.restaurant_id),
+        restaurant_name: p.restaurant_name,
+        surprise_package: parseInt(p.surprise_package),
+        content: p.content ? JSON.parse(p.content) : null,
+        price: p.price,
+        size: p.size,
+        start_time: dayjs(p.start_time),
+        end_time: dayjs(p.end_time),
+        availability: parseInt(p.availability),
       }));
       console.log('answers: '+JSON.stringify(packages));
       resolve(packages);
@@ -60,37 +60,26 @@ exports.listPackagesForRestaurant = (restaurantId) => {
 };
 
 
-// ottieni tutte le prenotazioni per un utente
-/** 
-exports.listBookingsForUser = (userId) => {
-  return new Promise((resolve, reject) => {
-    const sql = 'SELECT * FROM bookings WHERE user_id = ?';
-    db.all(sql, [userId], (err, rows) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      const bookings = rows.map((booking) => ({
-        id: booking.id,
-        user_id: booking.user_id,
-        package_ids: JSON.parse(booking.package_ids), //array di interi e non stringa JSON
-      }));
-      resolve(bookings);
-    });
-  });
-};
-*/
-
+/** Ottieni tutte le prenotazioni per un utente */
 exports.listBookingsForUser = (userId) => {
   return new Promise((resolve, reject) => {
     const sql = `
-      SELECT b.id AS booking_id, b.user_id, b.package_ids,
-             p.id AS package_id, p.restaurant_name, p.surprise_package,
-             p.price, p.size, p.start_time AS package_start_time, p.end_time AS package_end_time
-      FROM bookings AS b
-      JOIN booking_packages AS bp ON b.id = bp.booking_id
-      JOIN packages AS p ON bp.package_id = p.id
-      WHERE b.user_id = ?
+    SELECT bookings.id AS booking_id, 
+       bookings.user_id, 
+       bookings.package_ids, 
+       packages.id AS package_id,
+       packages.restaurant_id,
+       packages.restaurant_name,
+       packages.surprise_package,
+       packages.content,
+       packages.price,
+       packages.size,
+       packages.start_time,
+       packages.end_time
+    FROM bookings
+    JOIN packages ON ',' || bookings.package_ids || ',' LIKE '%,' || packages.id || ',%'
+    WHERE user_id = ?
+    ORDER BY bookings.id ASC;
     `;
 
     db.all(sql, [userId], (err, rows) => {
@@ -99,42 +88,48 @@ exports.listBookingsForUser = (userId) => {
         return;
       }
 
-      const bookings = {};
-      rows.forEach((row) => {
-        const bookingId = row.booking_id;
+      const bookings = [];
+      let currentBooking = null;  // tenere traccia della prenotazione corrente mentre si scorrono i risultati della query
 
-        if (!bookings[bookingId]) {
-          // Se è la prima volta che troviamo questa prenotazione, creiamo un nuovo oggetto
-          bookings[bookingId] = {
-            id: bookingId,
+      rows.forEach((row) => {
+        //Se la prenotazione corrente non esiste ancora o l'ID della prenotazione corrente è diverso da quello della riga corrente, 
+        //viene creata una nuova prenotazione in currentBooking
+        if (!currentBooking || currentBooking.id !== row.booking_id) {
+          currentBooking = {
+            id: row.booking_id,
             user_id: row.user_id,
-            package_ids: JSON.parse(row.package_ids),
+            //split(',') suddivide la stringa package_ids in un array utilizzando la virgola come separatore. 
+            //Converto poi ogni elemento in un intero base 10
+            package_ids: row.package_ids.split(',').map(id => parseInt(id, 10)),
             packages: [],
           };
+          bookings.push(currentBooking);
         }
 
-        // Aggiungiamo le informazioni del pacchetto all'array "packages"
-        bookings[bookingId].packages.push({
+        const packageInfo = {
           id: row.package_id,
+          restaurant_id: row.restaurant_id,
           restaurant_name: row.restaurant_name,
-          surprise_package: row.surprise_package,
+          surprise_package: row.surprise_package === 1,
           price: row.price,
           size: row.size,
-          package_start_time: dayjs(row.package_start_time),
-          package_end_time: dayjs(row.package_end_time),
-        });
+          start_time: dayjs(row.start_time),
+          end_time: dayjs(row.end_time),
+        };
+
+        currentBooking.packages.push(packageInfo);
       });
 
-      // Convertemo l'oggetto in un array per ottenere il risultato finale
-      const result = Object.values(bookings);
-      resolve(result);
+      resolve(bookings);
     });
   });
 };
 
 
-
-// controlla la disponibilità dei pacchetti. Ritorna 0 se tutti i pacchetti sono disponibili, altrimenti torna gli id dei pacchetti non disponibili
+/** 
+ * Controlla la disponibilità dei pacchetti. 
+ * Ritorna array vuoto se tutti i pacchetti sono disponibili, altrimenti torna gli id dei pacchetti non disponibili 
+ **/
 exports.checkPackageAvailability = (packageIds) => {
   return new Promise((resolve, reject) => {
 
@@ -159,7 +154,7 @@ exports.checkPackageAvailability = (packageIds) => {
 };
 
 
-// Crea una nuova prenotazione per un utente
+/** Crea una nuova prenotazione per un utente. Setta la disponibilità dei pacchetti a 0. */
 exports.createBooking = (userId, packageIds) => {
   return new Promise((resolve, reject) => {
     const sqlInsertBooking = 'INSERT INTO bookings(user_id, package_ids) VALUES (?, ?)'; 
@@ -193,17 +188,46 @@ exports.createBooking = (userId, packageIds) => {
 };
 
 
-
-// elimina una prenotazione per un utente
+/** Elimina una prenotazione per un utente. Risetta la disponibilità dei pacchetti a 1. */
 exports.deleteBooking = (bookingId, userId) => {
   return new Promise((resolve, reject) => {
-    const sql = 'DELETE FROM bookings WHERE id = ? AND userId = ?';
-    db.run(sql, [bookingId, userId], function (err) {
+    // Ottieni gli ID dei pacchetti dalla prenotazione
+    const sqlGetPackageIds = 'SELECT package_ids FROM bookings WHERE id = ? AND user_id = ?';
+    db.get(sqlGetPackageIds, [bookingId, userId], (err, row) => {
       if (err) {
         reject(err);
         return;
       }
-      resolve(this.changes);  // Number of affected rows
+
+      if (!row) {
+        reject(new Error('Booking not found or does not belong to the user'));
+        return;
+      }
+
+      // Utilizza direttamente gli ID dei pacchetti come array di numeri
+      const packageIds = row.package_ids.split(',').map(id => parseInt(id, 10));
+
+      // Aggiorna la disponibilità dei pacchetti
+      const sqlUpdateAvailability = 'UPDATE packages SET availability = 1 WHERE id IN (' + packageIds.join(',') + ')';
+      db.run(sqlUpdateAvailability, function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // Elimina la prenotazione
+        const sqlDeleteBooking = 'DELETE FROM bookings WHERE id = ? AND user_id = ?';
+        db.run(sqlDeleteBooking, [bookingId, userId], function (err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          resolve(this.changes);  // Numero di righe interessate
+        });
+      });
     });
   });
 };
+
+

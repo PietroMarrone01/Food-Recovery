@@ -45,7 +45,9 @@ function NavHeader(props) {
     );
 }
 
-/** FORM PER IL LOGIN */
+/** 
+ * FORM PER IL LOGIN 
+ */
 function LoginForm(props) {
     const [username, setUsername] = useState('harry@test.com');
     const [password, setPassword] = useState('pwd');
@@ -69,10 +71,8 @@ function LoginForm(props) {
       event.preventDefault();
       setErrorMessage('');
       const credentials = { username, password };  // Username e password prese direttamente dallo stato
-    
 
       let valid = true;
-      
       if (username === '' || password === '') {
         valid = false;
         setErrorMessage('I campi username e/o password non possono essere vuoti.');
@@ -81,7 +81,6 @@ function LoginForm(props) {
       if (valid) {
         doLogIn(credentials);
       }
-      // Altrimenti, i messaggi di errore sono già impostati
     };
     
   
@@ -111,17 +110,12 @@ function LoginForm(props) {
       )
   }
 
-//COSTRUTTORI
+/**
+ * FUNZIONI COSTRUTTRICI
+ */
+
 /**
  * Il tipo di Ristorante, utilizzato nell'applicazione.
- * Questa è una funzione costruttrice, pensata per essere chiamata con "new".
- *
- * @param id l'identificatore univoco per il ristorante
- * @param name il nome del ristorante
- * @param address l'indirizzo del ristorante
- * @param phoneNumber il numero di telefono del ristorante
- * @param cuisineType il tipo di cucina offerto dal ristorante
- * @param foodCategory la categoria alimentare del ristorante
  */
 function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
     this.id = id;
@@ -134,18 +128,9 @@ function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
 
 /**
  * Il tipo di Pacchetto offerto dal ristorante, utilizzato nell'applicazione.
- * Questa è una funzione costruttrice, pensata per essere chiamata con "new".
- *
- * @param id l'identificatore univoco per il pacchetto
- * @param restaurantId l'identificatore del ristorante a cui il pacchetto appartiene
- * @param restaurantName il nome del ristorante
  * @param surprisePackage indica se il pacchetto è una sorpresa (0 per pacchetto normale, 1 per sorpresa)
- * @param content la descrizione o il contenuto del pacchetto
- * @param price il prezzo del pacchetto
- * @param size la dimensione o quantità del pacchetto
- * @param startTime l'ora di inizio prelievo del pacchetto
- * @param endTime l'ora di fine prelievo del pacchetto
  * @param availability indica se il pacchetto è disponibile (0 per false, 1 per true)
+ * @param removedItems indica il numero di tipi di cibo eliminati per ciascun pacchetto presente nel carrello 
  */
 function Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, removedItems) {
   this.id = id;

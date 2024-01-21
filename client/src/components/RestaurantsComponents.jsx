@@ -41,13 +41,14 @@ function MainRestaurants(props) {
   
   const navigate = useNavigate();
 
+  //Creo un array di oggetti di tipo Restaurant
   const restaurantsList = props.restaurants.map((restaurant) => {
     const { id, name, address, phoneNumber, cuisineType, foodCategory } = restaurant;
     return new Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory);
   });
 
   /** ---- INIZIO PARTE PER ORDINAMENTO ALFABETICO ---- */
-  /** Stato locale per la visualizzazione in ordine alfabetico */
+  //Stato locale per la visualizzazione in ordine alfabetico
   const [sortOrder, setSortOrder] = useState('asc');  
 
   if (sortOrder === 'asc') {

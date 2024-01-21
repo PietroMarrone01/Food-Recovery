@@ -2,6 +2,10 @@ import dayjs from "dayjs";
 
 const URL = 'http://localhost:3001/api';
 
+/**
+ * Restituisce la lista di tutti i ristoranti.
+ * Mappa i dati ricevuti dal server in un nuovo oggetto con le proprietà desiderate.
+ */
 async function getAllRestaurants() {
   const response = await fetch(URL + '/restaurants');
   const restaurants = await response.json();
@@ -20,6 +24,10 @@ async function getAllRestaurants() {
   }
 }
 
+/**
+ * Restituisce la lista di tutti i pacchetti per uno specifico ristorante usando il suo ID.
+ * Mappa i dati ricevuti dal server in un nuovo oggetto con le proprietà desiderate.
+ */
 async function getPackagesForRestaurant(restaurantId) {
   const response = await fetch(`${URL}/restaurants/${restaurantId}/packages`, {credentials: 'include',});
   const packages = await response.json();
@@ -41,51 +49,44 @@ async function getPackagesForRestaurant(restaurantId) {
     throw packages;
   }
 }
-/** 
+
+/**
+ * Recupera tutte le prenotazioni di un utente.
+ * Ritorna un array di oggetti che rappresentano le prenotazioni, ciascuna con le informazioni di tutti i pacchetti da cui è composta.
+ */
 async function getAllBookings() {
-  const response = await fetch(`${URL}/bookings`, {credentials: 'include',});
+  const response = await fetch(`${URL}/bookings`, { credentials: 'include' });
   const bookings = await response.json();
+
+  //console.log(bookings);  
 
   if (response.ok) {
     return bookings.map((booking) => ({
       id: booking.id,
       userId: booking.user_id,
-      packageIds: JSON.parse(booking.package_ids),
+      packageIds: booking.package_ids, 
+      packages: booking.packages.map((p) => ({
+        packageId: p.id,
+        restaurantId: p.restaurant_id,
+        restaurantName: p.restaurant_name,
+        surprisePackage: p.surprise_package,
+        price: p.price,
+        size: p.size,
+        startTime: dayjs(p.start_time),
+        endTime: dayjs(p.end_time),
+      })), 
     }));
   } else {
     throw bookings;
   }
-}*/
-
-async function getAllBookings() {
-  try {
-    const response = await fetch(`${URL}/bookings`, { credentials: 'include' });
-    const detailedBookings = await response.json();
-
-    if (response.ok) {
-      return detailedBookings.map((booking) => ({
-        id: booking.id,
-        userId: booking.userId,
-        packageIds: booking.packageIds,
-        packages: booking.packages.map((p) => ({
-          id: p.id,
-          restaurantName: p.restaurantName,
-          surprisePackage: p.surprisePackage,
-          price: p.price,
-          size: p.size,
-          packageStartTime: p.packageStartTime,
-          packageEndTime: p.packageEndTime,
-        })),
-      }));
-    } else {
-      throw detailedBookings;
-    }
-  } catch (error) {
-    console.error('Error fetching bookings:', error);
-    throw { error: 'Errore durante il recupero delle prenotazioni' };
-  }
 }
 
+/**
+ * Crea una prenotazione inviando al server un array di ID dei pacchetti selezionati.
+ * @param {Array} packageIds - Array di ID dei pacchetti selezionati
+ * @returns {Promise} - Promise che si risolve con la risposta del server in caso di successo,
+ * altrimenti viene rigettata con un oggetto di errore.
+ */
 export function createBooking(packageIds) {
   return new Promise((resolve, reject) => {
     fetch(`${URL}/bookings`, {
@@ -109,14 +110,18 @@ export function createBooking(packageIds) {
       }
     })
     .catch(() => reject({ error: 'Cannot communicate with the server.' }));
-});
+  });
 }
 
-
-
-function deleteBooking(bookingId) {
+/**
+ * Elimina una prenotazione dal server.
+ * @param {string} bookingId - L'ID della prenotazione da eliminare.
+ * Ritorna una Promise che si risolve con null se l'eliminazione è avvenuta con successo, altrimenti viene 
+ * rigettata con un messaggio di errore.
+ */
+function deleteBooking(id) {
   return new Promise((resolve, reject) => {
-    fetch(URL + `/bookings/${bookingId}`, {
+    fetch(URL + `/bookings/${id}`, {
       method: 'DELETE',
       credentials: 'include',  
     }).then((response) => {
@@ -126,14 +131,16 @@ function deleteBooking(bookingId) {
         // analyze the cause of error
         response.json()
           .then((message) => { reject(message); }) // error message in the response body
-          .catch(() => { reject({ error: "Cannot parse server response." }) }); // something else
+          .catch(() => { reject({ error: "Impossibile analizzare la risposta del server." }) }); // something else
       }
-    }).catch(() => { reject({ error: "Cannot communicate with the server." }) }); // connection errors
+    }).catch(() => { reject({ error: "Impossibile comunicare con il server." }) }); // connection errors
   });
 }
 
 
-/** API per autenticazione */
+/** 
+ * API per AUTENTICAZIONE 
+ **/
 
 async function logIn(credentials) {
   let response = await fetch(URL + '/sessions', {

@@ -58,7 +58,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions)); 
 
-const answerDelay = 1200;
+const answerDelay = 900;
 
 // custom middleware: check if a given request is coming from an authenticated user
 const isLoggedIn = (req, res, next) => {
@@ -114,7 +114,6 @@ app.get('/api/restaurants/:id/packages', isLoggedIn, async (req, res) => {
 });
 
 // GET /api/bookings - AUTH 
-/** 
 app.get('/api/bookings', isLoggedIn, async (req, res) => {
   const userId = req.user.id;
   try {
@@ -123,49 +122,14 @@ app.get('/api/bookings', isLoggedIn, async (req, res) => {
       res.status(404).json(bookings);
     else
       setTimeout(() => res.json(bookings), answerDelay);
-  } catch (err) {
-    console.log(err);
-    res.status(500).end();
-  }
-});*/
-
-// GET /api/bookings - AUTH 
-app.get('/api/bookings', isLoggedIn, async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const bookings = await dao.listBookingsForUser(userId);
-
-    if (bookings.error) {
-      res.status(404).json(bookings);
-      return;
-    }
-
-    // Adatta la risposta in base al formato desiderato
-    const detailedBookings = bookings.map((booking) => ({
-      id: booking.id,
-      userId: booking.user_id,
-      packageIds: booking.package_ids,
-      packages: booking.packages.map((p) => ({
-        id: p.id,
-        restaurantName: p.restaurant_name,
-        surprisePackage: p.surprise_package,
-        price: p.price,
-        size: p.size,
-        packageStartTime: p.package_start_time,
-        packageEndTime: p.package_end_time,
-      })),
-    }));
-
-    setTimeout(() => res.json(detailedBookings), answerDelay);
+      console.log(bookings);
   } catch (err) {
     console.log(err);
     res.status(500).end();
   }
 });
 
-
-// POST /api/booking - AUTH 
+// POST /api/bookings - AUTH 
 app.post('/api/bookings', isLoggedIn, [
   check('packageIds').isArray(),], async (req, res) => {
 
@@ -197,7 +161,6 @@ app.post('/api/bookings', isLoggedIn, [
     res.status(500).json({ error: 'Errore durante la creazione della prenotazione' });
   }
 });
- 
 
 // DELETE /api/booking/:id - AUTH 
 app.delete('/api/bookings/:id', isLoggedIn, async (req, res) => {
@@ -206,7 +169,7 @@ app.delete('/api/bookings/:id', isLoggedIn, async (req, res) => {
 
   try {
     const numRowChanges = await dao.deleteBooking(bookingId, userId);
-    res.json(numRowChanges);
+    setTimeout(() => res.json(numRowChanges), answerDelay);
   } catch (err) {
     console.log(err);
     res.status(503).json({ error: `Database error during the deletion of booking ${bookingId}.` });
@@ -237,7 +200,6 @@ app.post('/api/sessions', function(req, res, next) {
       });
   })(req, res, next);
 });
-
 
 // DELETE /sessions/current 
 // logout
