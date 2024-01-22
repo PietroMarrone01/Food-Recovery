@@ -20,4 +20,12 @@
   color: #000; /* Colore del testo, puoi adattarlo in base alle tue esigenze */
 }
 
+/*Utilizzato per il colore del nome del ristorante nella schermata delle prenotazioni*/
+.green-underline-text {
+  color: green; /* Colore verde */
+  text-decoration: underline; /* Sottolineato */
+}
+
+
+
   

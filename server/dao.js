@@ -53,7 +53,7 @@ exports.listPackagesForRestaurant = (restaurantId) => {
         end_time: dayjs(p.end_time),
         availability: parseInt(p.availability),
       }));
-      console.log('answers: '+JSON.stringify(packages));
+      //console.log('answers: '+JSON.stringify(packages));
       resolve(packages);
     });
   });
@@ -66,7 +66,8 @@ exports.listBookingsForUser = (userId) => {
     const sql = `
     SELECT bookings.id AS booking_id, 
        bookings.user_id, 
-       bookings.package_ids, 
+       bookings.package_ids,
+       bookings.package_contents, 
        packages.id AS package_id,
        packages.restaurant_id,
        packages.restaurant_name,
@@ -98,24 +99,33 @@ exports.listBookingsForUser = (userId) => {
           currentBooking = {
             id: row.booking_id,
             user_id: row.user_id,
+
             //split(',') suddivide la stringa package_ids in un array utilizzando la virgola come separatore. 
             //Converto poi ogni elemento in un intero base 10
             package_ids: row.package_ids.split(',').map(id => parseInt(id, 10)),
+
+            // Parsing del campo package_contents. Da stringa JSON diventa oggetto JS
+            package_contents: JSON.parse(row.package_contents), 
             packages: [],
           };
           bookings.push(currentBooking);
         }
+
+        const packageIndex = currentBooking.package_ids.indexOf(row.package_id);
 
         const packageInfo = {
           id: row.package_id,
           restaurant_id: row.restaurant_id,
           restaurant_name: row.restaurant_name,
           surprise_package: row.surprise_package === 1,
+          content: currentBooking.package_contents[packageIndex], // Utilizza l'indice corrispondente di package_ids
           price: row.price,
           size: row.size,
           start_time: dayjs(row.start_time),
           end_time: dayjs(row.end_time),
         };
+
+        //console.log(packageInfo);
 
         currentBooking.packages.push(packageInfo);
       });
@@ -155,16 +165,19 @@ exports.checkPackageAvailability = (packageIds) => {
 
 
 /** Crea una nuova prenotazione per un utente. Setta la disponibilità dei pacchetti a 0. */
-exports.createBooking = (userId, packageIds) => {
+exports.createBooking = (userId, packageIds, packageContents) => {
   return new Promise((resolve, reject) => {
-    const sqlInsertBooking = 'INSERT INTO bookings(user_id, package_ids) VALUES (?, ?)'; 
+    const sqlInsertBooking = 'INSERT INTO bookings(user_id, package_ids, package_contents) VALUES (?, ?, ?)'; 
     const sqlUpdateAvailability = 'UPDATE packages SET availability = 0 WHERE id = ?';
 
     // Concatenazione degli ID dei pacchetti in una stringa separata da virgole
     const concatenatedPackageIds = packageIds.join(',');
 
+    // Serializza l'array di array di oggetti in formato JSON
+    const serializedPackageContents = JSON.stringify(packageContents);
+
     // Esecuzione dell'inserimento della prenotazione
-    db.run(sqlInsertBooking, [userId, concatenatedPackageIds], function (err) {
+    db.run(sqlInsertBooking, [userId, concatenatedPackageIds, serializedPackageContents], function (err) {
       if (err) {
         reject(err);
         return;
@@ -191,7 +204,7 @@ exports.createBooking = (userId, packageIds) => {
 /** Elimina una prenotazione per un utente. Risetta la disponibilità dei pacchetti a 1. */
 exports.deleteBooking = (bookingId, userId) => {
   return new Promise((resolve, reject) => {
-    // Ottieni gli ID dei pacchetti dalla prenotazione
+    // ID dei pacchetti dalla prenotazione
     const sqlGetPackageIds = 'SELECT package_ids FROM bookings WHERE id = ? AND user_id = ?';
     db.get(sqlGetPackageIds, [bookingId, userId], (err, row) => {
       if (err) {
@@ -204,10 +217,10 @@ exports.deleteBooking = (bookingId, userId) => {
         return;
       }
 
-      // Utilizza direttamente gli ID dei pacchetti come array di numeri
+      // Utilizzo gli ID dei pacchetti come array di numeri
       const packageIds = row.package_ids.split(',').map(id => parseInt(id, 10));
 
-      // Aggiorna la disponibilità dei pacchetti
+      // Aggiorno la disponibilità dei pacchetti
       const sqlUpdateAvailability = 'UPDATE packages SET availability = 1 WHERE id IN (' + packageIds.join(',') + ')';
       db.run(sqlUpdateAvailability, function (err) {
         if (err) {

@@ -64,12 +64,14 @@ async function getAllBookings() {
     return bookings.map((booking) => ({
       id: booking.id,
       userId: booking.user_id,
-      packageIds: booking.package_ids, 
+      packageIds: booking.package_ids,
+      packageContents: booking.package_contents,
       packages: booking.packages.map((p) => ({
         packageId: p.id,
         restaurantId: p.restaurant_id,
         restaurantName: p.restaurant_name,
         surprisePackage: p.surprise_package,
+        content: p.content, 
         price: p.price,
         size: p.size,
         startTime: dayjs(p.start_time),
@@ -84,10 +86,11 @@ async function getAllBookings() {
 /**
  * Crea una prenotazione inviando al server un array di ID dei pacchetti selezionati.
  * @param {Array} packageIds - Array di ID dei pacchetti selezionati
+ * @param {Array} packageContents - Array dei contenuti dei pacchetti selezionati (Array di Array di oggetti)
  * @returns {Promise} - Promise che si risolve con la risposta del server in caso di successo,
  * altrimenti viene rigettata con un oggetto di errore.
  */
-export function createBooking(packageIds) {
+export function createBooking(packageIds, packageContents) {
   return new Promise((resolve, reject) => {
     fetch(`${URL}/bookings`, {
       method: 'POST',
@@ -95,7 +98,7 @@ export function createBooking(packageIds) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ packageIds }),
+      body: JSON.stringify({ packageIds, packageContents }),
     })
     .then((response) => {
       if (response.ok) {

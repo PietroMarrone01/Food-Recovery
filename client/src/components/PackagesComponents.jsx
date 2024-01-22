@@ -58,7 +58,7 @@ function PackageRow(props) {
       <td>{renderAvailability()}</td>
       <td>
         <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
-        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
+        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 }>
           Aggiungi al carrello
         </Button>
       </td>

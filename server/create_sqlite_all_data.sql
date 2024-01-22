@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS "packages" (
 CREATE TABLE IF NOT EXISTS "bookings" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "user_id" INTEGER,
-    "package_ids" TEXT /* Nuovo campo per memorizzare gli id dei pacchetti della prenotazione */ 
+    "package_ids" TEXT,   /*campo per memorizzare gli id dei pacchetti della prenotazione */ 
+    "package_contents" TEXT /*campo per memorizzare i contenuti dei pacchetti della prenotazione */ 
 );
 
 

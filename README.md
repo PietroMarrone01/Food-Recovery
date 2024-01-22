@@ -7,7 +7,7 @@
 - Route `/`: pagina principale, mostra la lista completa dei ristoranti quando si arriva sul sito
 - Route `/restaurants/:resId`: pagina per la visualizzazione dei pacchetti di ciascun ristorante
 - Route `/bookings`: pagina per la visualizzazione delle prenotazioni di un utente
-- Route `/login`: pagina per fare il login
+- Route `/login`: pagina per il login
 - Route `*`: per le pagine che non esistono
 
 ## API Server
@@ -80,7 +80,7 @@
 - URL: /api/bookings
 
 - Metodo: GET
-
+ 
 - Autorizzazione: Richiesta autenticazione
 
 - Descrizione: Ottieni un elenco delle prenotazioni effettuate dall'utente autenticato.
@@ -92,13 +92,26 @@
   - 404 Not Found 
   - 500 Errore Interno del Server (errore generico).
 
-- Corpo della Risposta (Esempio Successo):
+- Corpo della Risposta (Esempio Successo): Un array di oggetti, ognuno che descrive una singola prenotazione. Ogni oggetto prenotazione è costituito da campi che sono a loro volta array: "packages" è per esempio un array di oggetti ciascuno descrivente il singolo pacchetto di quella specifica prenotazione. 
 ```
 [
   {
     "id": 15,
     "user_id": 4,
     "package_ids": [1, 12, 8],
+    "package_contents": [
+      [
+        {
+            "name": "Dolce al Cioccolato",
+            "quantity": 2
+        },
+        {
+            "name": "Tiramisù",
+            "quantity": 1
+        }
+      ],
+      null], 
+
     "packages": [
       {
         "id": 1,
@@ -107,6 +120,11 @@
         "surprise_package": false,
         "price": 12.99,
         "size": "Piccola",
+        "content": [{
+            "name": "Dolce al Cioccolato",
+            "quantity": 2},
+        {   "name": "Tiramisù",
+            "quantity": 1}],
         "start_time": "2024-01-25 10:30:00",
         "end_time": "2024-01-25 17:00:00",
         "availability": true
@@ -136,14 +154,32 @@
 - Autorizzazione: Richiesta autenticazione
 
 - Validazione: Controlla la validità della richiesta, ritornando eventuali errori di validazione con status 422 Unprocessable Entity.
-packageIds: Array di ID dei pacchetti
+   - packageIds: Array di ID dei pacchetti
+   - packageContents: Array dei contenuti dei pacchetti
 
 - Descrizione: Crea una nuova prenotazione per l'utente autenticato, verificando la disponibilità dei pacchetti specificati. Restituisce l'ID della prenotazione se la creazione è avvenuta con successo, altrimenti restituisce un array con gli ID dei pacchetti non disponibili.
 
-- Corpo della Richiesta: Un oggetto che rappresenta una prenotazione (Content-Type: application/json).
+- Corpo della Richiesta: "packageIds", ossia l'elenco degli identificativi dei pacchetti inclusi nella prenotazione e
+"package_contents", ovvero l'elenco dei contenuti dei pacchetti inclusi nella prenotazione (e modificati nel carrello).
 ```
 {
    "packageIds": [1, 12, 8]
+}
+
+{
+   "packageContents": [
+      null, 
+      [
+        {
+            "name": "Dolce al Cioccolato",
+            "quantity": 2
+        },
+        {
+            "name": "Tiramisù",
+            "quantity": 1
+        }
+      ],
+      null], 
 }
 ```
 - Risposta: 200 OK (successo) con l'ID della prenotazione oppure 200 OK con un array di ID dei pacchetti non disponibili.
@@ -199,7 +235,6 @@ packageIds: Array di ID dei pacchetti
 {
   "error": "Database error during the deletion of booking :id."
 }
-
 ```
 
 ### __6. Creare una nuova sessione (login)__
@@ -303,6 +338,7 @@ packageIds: Array di ID dei pacchetti
   - `id`: Identificativo univoco della prenotazione.
   - `user_id`: Identificativo dell'utente associato alla prenotazione.
   - `package_ids`: Elenco degli identificativi dei pacchetti inclusi nella prenotazione.
+  - `package_contents`: Elenco dei contenuti dei pacchetti inclusi nella prenotazione (e modificati nel carrello).
 
 
 
@@ -325,7 +361,7 @@ packageIds: Array di ID dei pacchetti
   - `showBookings`: Funzione per mostrare le prenotazioni.
 - **Comportamento:**
   - Ordina i ristoranti in ordine alfabetico.
-  - Fornisce una tabella interattiva di ristoranti con informazioni dettagliate.
+  - Fornisce una tabella di ristoranti con informazioni dettagliate.
   - Permette di visualizzare i pacchetti disponibili per ogni ristorante e di entrare nella schermata delle prenotazioni.
 
 ### 3. Componente PackagesList

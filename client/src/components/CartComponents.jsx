@@ -38,7 +38,7 @@ function CartItem(props) {
         removedItems: updatedP.removedItems + 1,
       };
 
-      // Aggiorna lo stato locale con il nuovo pacchetto e lo stato del carrello, ossia  (updateCart presente in App.jsx)
+      // Aggiorna lo stato locale con il nuovo pacchetto e lo stato del carrello, ossia updateCart (presente in App.jsx)
       setUpdatedP(updatedItem);
       updateCart(updatedItem)
     };

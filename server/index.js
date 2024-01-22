@@ -122,7 +122,7 @@ app.get('/api/bookings', isLoggedIn, async (req, res) => {
       res.status(404).json(bookings);
     else
       setTimeout(() => res.json(bookings), answerDelay);
-      console.log(bookings);
+      //console.log(bookings);
   } catch (err) {
     console.log(err);
     res.status(500).end();
@@ -131,14 +131,15 @@ app.get('/api/bookings', isLoggedIn, async (req, res) => {
 
 // POST /api/bookings - AUTH 
 app.post('/api/bookings', isLoggedIn, [
-  check('packageIds').isArray(),], async (req, res) => {
+  check('packageIds').isArray(),
+  check('packageContents').isArray(),], async (req, res) => {
 
   const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-  const { packageIds } = req.body;
+  const { packageIds, packageContents } = req.body;
   const userId = req.user.id;
   
   try {
@@ -147,13 +148,13 @@ app.post('/api/bookings', isLoggedIn, [
 
     if (unavailablePackages.length !== 0) {
       // Alcuni pacchetti non sono disponibili
-      console.log(unavailablePackages);
+      //console.log(unavailablePackages);
       res.json(unavailablePackages);
       return;
     }
 
     // Tutti i pacchetti sono disponibili, crea la prenotazione
-    const bookingId = await dao.createBooking(userId, packageIds);
+    const bookingId = await dao.createBooking(userId, packageIds, packageContents);
 
     res.json(bookingId);
   } catch (error) {

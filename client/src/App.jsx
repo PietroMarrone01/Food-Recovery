@@ -26,12 +26,6 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
 
-  /** Lista delle prenotazioni */
-  const [bookings, setBookings] = useState([]);
-
-  /** Stato per gestire la ricarica delle prenotazioni quando ne viene eliminata una (si entra in uno stato "sporco") */
-  const [dirty, setDirty] = useState(false);
-
   /** Stati per gestire 
    * - messaggio di successo in caso di prenotazione confermata --> usato nella useEffect
    * - messaggio di avviso + pacchetti già prenotati da evidenziare --> usato nella useEffect
@@ -39,6 +33,11 @@ function App() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [highlightUnavailable, setHighlightUnavailable] = useState(false);
 
+  /** Lista delle prenotazioni */
+  const [bookings, setBookings] = useState([]);
+
+  /** Stato per gestire la ricarica delle prenotazioni quando ne viene eliminata una (si entra in uno stato "sporco") */
+  const [dirty, setDirty] = useState(false);
 
   /** Informazioni sull'utente attualmente connesso. Questo è undefined quando nessun utente è connesso */
   const [user, setUser] = useState(undefined);
@@ -172,7 +171,7 @@ function App() {
     }
   };
 
-    /** ---- FUNZIONE PER LA GESTIONE DELLE PRENOTAZIONI ---- */
+    /** ---- FUNZIONI PER LA GESTIONE DELLE PRENOTAZIONI ---- */
     // Mostra tutte le prenotazioni
     const handleShowBookings = async () => {
       if (loggedIn) {
@@ -181,7 +180,7 @@ function App() {
           .then(b => {
             setBookings(b);
             setLoading(false);
-            //console.log(bookings);
+            //.log(b);
           })
         }
         catch (err) {
@@ -233,8 +232,10 @@ function App() {
   //Funzione chiamata quando confermo il carrello
   const handleConfirm = async () => {
     const packageIds = cartItems.map((item) => item.id);
+    const packageContents = cartItems.map((item) => item.content);
+    //console.log(packageContents);
     try {
-      const response = await API.createBooking(packageIds);
+      const response = await API.createBooking(packageIds, packageContents);
   
       //API.createBooking può ritornare o l'ID della prenotazione confermata oppure un array con gli ID dei pacchetti che non sono più disponibili
       if (Array.isArray(response)) {

@@ -2,7 +2,7 @@ import React from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Button, Table, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-
+import '../mycss.css';
 
 
 function BookRow(props) {
@@ -23,10 +23,10 @@ function BookRow(props) {
       <td>{props.index + 1}</td>
       <td>{booking.packages.length}</td>
       <td>
-        <ul>
+        <ol>
           {booking.packages.map((p) => (
             <li key={`${booking.id}-${p.packageId}`}>
-              <strong>Ristorante:</strong> {p.restaurantName} <br />
+              <strong className="green-underline-text">Ristorante {p.restaurantName}:</strong> <br />
               <strong>Tipo:</strong> {p.surprisePackage ? 'Sorpresa' : 'Normale'} <br />
               <strong>Prezzo:</strong> {p.price} <br />
               <strong>Dimensione:</strong> {p.size} <br />
@@ -34,7 +34,27 @@ function BookRow(props) {
               <strong>Data fine prelievo:</strong> {p.endTime.format('HH:mm')}
             </li>
           ))}
-        </ul>
+        </ol>
+      </td>
+      <td>
+        <ol>
+          {booking.packages.map((p) => (
+          <li key={`${booking.id}-${p.packageId}-content`}>
+            <strong className="green-underline-text">Ristorante {p.restaurantName} :</strong>
+            {p.content ? (
+            <ul>
+              {p.content.map((item, index) => (
+              <li key={`${booking.id}-${p.packageId}-content-${index}`}>
+                {item.name} - Quantità: {item.quantity}
+              </li>
+              ))}
+            </ul>) : (
+            <ul>
+              <li>Pacchetto sorpresa, nessun contenuto disponibile</li>
+            </ul>)}
+          </li>
+          ))}
+        </ol>
       </td>
       <td>
         <Button variant="danger" onClick={() => {
@@ -61,6 +81,7 @@ function BookingsList(props) {
             <th>N° prenotazione</th>
             <th>N° pacchetti prenotati</th>
             <th>Dettagli Pacchetti</th>
+            <th>Contenuto Pacchetti</th>
           </tr>
         </thead>
         <tbody>
