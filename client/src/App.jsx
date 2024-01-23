@@ -9,7 +9,6 @@ import {LoginForm} from './components/Miscellaneous';
 import {RestaurantRoute, PackageRoute, BookingRoute, NotFoundPage} from './components/Routes';
 
 
-
 function App() {
   
   /** Lista di ristoranti */
@@ -179,6 +178,7 @@ function App() {
           API.getAllBookings()
           .then(b => {
             setBookings(b);
+            
             setLoading(false);
             //.log(b);
           })
@@ -290,6 +290,7 @@ function App() {
         <Route path='/*' element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 

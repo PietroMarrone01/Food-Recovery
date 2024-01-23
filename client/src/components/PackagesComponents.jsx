@@ -58,7 +58,7 @@ function PackageRow(props) {
       <td>{renderAvailability()}</td>
       <td>
         <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
-        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 }>
+        disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
           Aggiungi al carrello
         </Button>
       </td>
@@ -109,7 +109,7 @@ function PackagesList(props) {
         <Col className="mt-3">
           <p className='fw-bold'>Pacchetti a disposizione nel ristorante: {packagesList[0].restaurantName}</p>
           <p>Numero pacchetti disponibili: {countAvailabilityOne(packagesList)}</p>
-          <p>Numero pacchetti non disponibili: {countAvailabilityZero(packagesList)}</p>
+          <p>Numero pacchetti prenotati: {countAvailabilityZero(packagesList)}</p>
         </Col>
       </Row>
       <Row>
@@ -138,7 +138,7 @@ function PackagesList(props) {
         <Col>
         <Button variant='secondary' onClick={() => {
           setLoading(true);
-          showBookings(); 
+          showBookings();
           navigate('/bookings'); }} 
           disabled={props.user?.id? false : true}> Le mie prenotazioni 
         </Button>

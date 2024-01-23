@@ -91,6 +91,7 @@
   - 200 OK (successo) con un array di oggetti che descrivono le prenotazioni dell'utente.
   - 404 Not Found 
   - 500 Errore Interno del Server (errore generico).
+  - 401 Unauthorized: la richiesta non arriva da una sessione autenticata.
 
 - Corpo della Risposta (Esempio Successo): Un array di oggetti, ognuno che descrive una singola prenotazione. Ogni oggetto prenotazione è costituito da campi che sono a loro volta array: "packages" è per esempio un array di oggetti ciascuno descrivente il singolo pacchetto di quella specifica prenotazione. 
 ```
@@ -140,10 +141,6 @@
 ```
 []
 ```
-
-- Errori Possibili:
-   - 401 Unauthorized: L'autenticazione dell'utente non è valida.
-   - 500 Internal Server Error: Errore generico durante il recupero delle prenotazioni dell'utente.
 
 ### __4. Crea Prenotazione__
 
@@ -199,7 +196,7 @@
 ```
 
 - Errori Possibili: 
-  - 401 Unauthorized: L'autenticazione dell'utente non è valida. 
+  - 401 Unauthorized: la richiesta non arriva da una sessione autenticata.
   - 422 Unprocessable Entity: La richiesta non è valida. 
   - 500 Internal Server Error: Errore generico durante la creazione della prenotazione.
 
@@ -220,7 +217,7 @@
 
 - Risposta:
    - 200 OK (successo) con il numero di righe interessate dalla cancellazione.
-   - 401 Unauthorized: L'autenticazione dell'utente non è valida.
+   - 401 Unauthorized: la richiesta non arriva da una sessione autenticata.
    - 503 Service Unavailable: Errore del database durante l'eliminazione della prenotazione.
 
 - Corpo della Risposta (Esempio Successo):
@@ -230,12 +227,7 @@
 }
 ```
 
-- Corpo della Risposta (Esempio Errore del Database):
-```
-{
-  "error": "Database error during the deletion of booking :id."
-}
-```
+
 
 ### __6. Creare una nuova sessione (login)__
 
@@ -299,7 +291,7 @@
 
 - **Descrizione:** Rappresenta gli utenti dell'applicazione.
 - **Campi:**
-  - `id`: Identificativo univoco dell'utente.
+  - `id`: Identificativo univoco dell'utente (chiave primaria).
   - `email`: Indirizzo email dell'utente.
   - `name`: Nome dell'utente.
   - `salt`: Stringa casuale utilizzata per la crittografia delle password.
@@ -309,7 +301,7 @@
 
 - **Descrizione:** Contiene informazioni sui ristoranti.
 - **Campi:**
-  - `id`: Identificativo univoco del ristorante.
+  - `id`: Identificativo univoco del ristorante (chiave primaria).
   - `name`: Nome del ristorante.
   - `address`: Indirizzo del ristorante.
   - `phone_number`: Numero di telefono del ristorante.
@@ -320,13 +312,13 @@
 
 - **Descrizione:** Rappresenta i pacchetti offerti dai ristoranti.
 - **Campi:**
-  - `id`: Identificativo univoco del pacchetto.
+  - `id`: Identificativo univoco del pacchetto (chiave primaria).
   - `restaurant_id`: Identificativo del ristorante associato al pacchetto.
   - `restaurant_name`: Nome del ristorante associato al pacchetto.
   - `surprise_package`: Campo booleano (0 per pacchetto normale, 1 per pacchetto sorpresa).
   - `content`: Descrizione del contenuto del pacchetto.
   - `price`: Prezzo del pacchetto.
-  - `size`: Dimensione del pacchetto.
+  - `size`: Dimensione del pacchetto (piccola/media/grande).
   - `start_time`: Ora di inizio prelievo del pacchetto.
   - `end_time`: Ora di fine prelievo del pacchetto.
   - `availability`: Campo booleano (0 per non disponibile, 1 per disponibile).
@@ -335,7 +327,7 @@
 
 - **Descrizione:** Contiene informazioni sulle prenotazioni degli utenti.
 - **Campi:**
-  - `id`: Identificativo univoco della prenotazione.
+  - `id`: Identificativo univoco della prenotazione (chiave primaria).
   - `user_id`: Identificativo dell'utente associato alla prenotazione.
   - `package_ids`: Elenco degli identificativi dei pacchetti inclusi nella prenotazione.
   - `package_contents`: Elenco dei contenuti dei pacchetti inclusi nella prenotazione (e modificati nel carrello).
@@ -409,13 +401,18 @@
 
 ## Screenshot
 
-![Screenshot](./img/Screenshot.png)
+![Screenshot](./img/Screenshot1.png)
+
+![Screenshot](./img/Screenshot2.png)
 
 ## Users Credentials
 
-- enrico@test.com, pwd (plus any other requested info)
-- luigi@test.com, pwd (plus any other requested info)
-- alice@test.com, pwd (plus any other requested info)
-- harry@test.com, pwd (plus any other requested info)
-- carol@test.com, pwd (plus any other requested info)
+- enrico@test.com, pwd 
+    - Info aggiuntive: 2 prenotazioni già fatte, di cui la prima da Pizzeria Margherita con pacchetto sopresa, la seconda dal Fruttivendo + Dolci tentazioni togliendo 1 cibo per ciascun pacchetto.
+- luigi@test.com, pwd 
+    - Info aggiuntive: 1 prenotazione già fatta da Pizzeria Vesuvio, dove dei 4 cibi ne ha tolti 2.
+- alice@test.com, pwd 
+- harry@test.com, pwd
+  - Info aggiuntive: utente con autenticazione di default, non ha nessuna prenotazione. Vedrà pacchetti non disponibili sia perchè prenotati (da Enrico e Luigi) sia perchè è scaduto il tempo di ritiro.
+- carol@test.com, pwd 
 

@@ -72,9 +72,17 @@ function BookingsList(props) {
   const navigate = useNavigate();
   const { bookings, user } = props;
 
+  const noBookings = bookings.length === 0; 
+
   return (
     <>
       <h2>Elenco Prenotazioni effettuate da {user.name}</h2>
+      {noBookings?           
+      <Alert variant="info" className="text-center">
+        <h5 className="font-weight-bold">
+          Non hai effettuato ancora nessuna prentazione. Torna ai Ristoranti per prenotare i tuoi pacchetti!
+        </h5>
+      </Alert> :       
       <Table hover>
         <thead>
           <tr>
@@ -89,7 +97,7 @@ function BookingsList(props) {
             <BookRow key={booking.id} booking={booking} index={index} user={user} deleteBooking={props.deleteBooking}/>
           ))}
         </tbody>
-      </Table>
+      </Table>}
       <Row className="mt-3">
         <Col>
           <Button variant="secondary" onClick={() => navigate('/')} disabled={!user?.id}>
