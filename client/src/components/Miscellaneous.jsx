@@ -21,7 +21,7 @@ function NavHeader(props) {
         <Navbar bg='black' variant='dark'>
             <Container fluid>
                 <Navbar.Brand className='fs-2' href="/" onClick={event => {event.preventDefault(); navigate("/");}}>
-                    <span role="img" aria-label="restaurant">🍔</span> Don't Waste, l'App contro lo spreco alimentare
+                    <span role="img" aria-label="restaurant">🍔</span> Don't waste, the App against food waste
                 </Navbar.Brand>
                 <Navbar.Toggle />
                 <Navbar.Collapse className="justify-content-end">

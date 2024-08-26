@@ -139,7 +139,7 @@ function Cart(props) {
     return (
       <div className="text-center my-3">
         <Button className="button-light-blue" onClick={() => setShowCart(true)}>
-          Visualizza il carrello ({cartItems.length})
+        View cart ({cartItems.length})
         </Button>
 
         {showCart? <CartModal cartItems={cartItems} hideCart={hideCart} 
