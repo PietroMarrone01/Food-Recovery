@@ -11,34 +11,34 @@ function CartItem(props) {
   const startTime = p.startTime.format('HH:mm');
   const endTime = p.endTime.format('HH:mm');
 
-  /** 
-   * Variabile di stato locale per memorizzare il pacchetto aggiornato. 
-   * Proprietà removedItems (usata per tenere traccia del numero di tipi di cibo rimossi nel pacchetto) è inizializzata a 0. 
-   * e la incremento ogni volta che rimuovo un tipo di cibo dal contenuto del pacchetto.
-  */
+/** 
+ * Local state variable to store the updated package. 
+ * The removedItems property (used to keep track of the number of types of food removed from the package) is initialized to 0 
+ * and is incremented each time a type of food is removed from the package contents.
+ */
   const [updatedP, setUpdatedP] = useState(p);
 
   const renderPackageType = () => {
     return updatedP.surprisePackage ? 'Pacchetto Sorpresa' : 'Pacchetto Normale';
   };
 
-  /** Funzione per la visualizzazione del contenuto del pacchetto nel carrello (che garantisce aggiornamento del contenuto) */
+  /** Function for displaying the contents of the package in the cart (which guarantees updating of the content) */
   const renderContent = () => {
 
-    //funzione definita all'interno di renderContent che mi gestisce rimozione dei tipi di cibo
+    //function defined inside renderContent that handles removing food types
     const handleRemoveType = (index) => {
       // Clona l'oggetto content, rimuovendo l'elemento specificato dall'indice
       const newContent = [...updatedP.content];
       newContent.splice(index, 1);
 
-      // Crea un nuovo oggetto P con il contenuto aggiornato e la proprietà "removedItems" incrementata
+      // Creates a new object P with updated contents and incremented "removedItems" property
       const updatedItem = {
         ...updatedP,
         content: newContent,
         removedItems: updatedP.removedItems + 1,
       };
 
-      // Aggiorna lo stato locale con il nuovo pacchetto e lo stato del carrello, ossia updateCart (presente in App.jsx)
+      // Update local state with new package and cart state i.e. updateCart (present in App.jsx)
       setUpdatedP(updatedItem);
       updateCart(updatedItem)
     };
@@ -67,7 +67,7 @@ function CartItem(props) {
     }
   };
 
-  //determinare se l'elemento deve essere contrassegnato come non disponibile (per evidenziarlo per 5 secondi).
+  //determine whether the item should be marked as unavailable (to highlight it for 5 seconds).
   const isUnavailable = highlightUnavailable && cartItems.some(item => item.id === p.id);
 
   return (
@@ -75,14 +75,14 @@ function CartItem(props) {
       <div>
         <strong>{updatedP.restaurantName}</strong> - {renderPackageType()}
         <div>{renderContent()}</div>
-        <div>Prezzo: {updatedP.price}</div>
-        <div>Dimensione: {updatedP.size}</div>
+        <div>Price: {updatedP.price}</div>
+        <div>Size: {updatedP.size}</div>
         <div>
-          Orario prelievo: {startTime} - {endTime}
+        Pickup time: {startTime} - {endTime}
         </div>
       </div>
       <Button variant="danger" size="sm" onClick={() => removeFromCart(updatedP)} disabled={highlightUnavailable}>
-        Rimuovi
+      Remove
       </Button>
     </div>
   );
@@ -101,27 +101,27 @@ function CartModal(props) {
     return (
       <Modal show={cartItems.length > 0} >
         <Modal.Header >
-          <Modal.Title>Il tuo carrello</Modal.Title>
+          <Modal.Title>Your cart</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {highlightUnavailable? 
           <Alert variant="danger" className="mb-3">
-            Prenotazione non confermata. I seguenti pacchetti sono stati nel frattempo prenotati da altri utenti. 
+            Reservation not confirmed. The following packages have meanwhile been booked by other users.
           </Alert> : 
           <Alert variant="warning" className="mb-3">
-            E' possibile rimuovere fino ad un massimo di due tipi di cibo per pacchetto. I pacchetti con un solo tipo di cibo rimanente non possono essere svuotati.
+            It is possible to remove up to a maximum of two types of food per package. Packets with only one type of food remaining cannot be emptied.
           </Alert>}
           {cartItems.map((item, index) => (
             <CartItem key={item.id} p={item} cartItems={cartItems} i={index} removeFromCart={removeFromCart} updateCart={updateCart} highlightUnavailable={highlightUnavailable}/>
           ))}
         </Modal.Body>
         <Modal.Footer>
-            <div className="font-weight-bold">Totale: {totalAmount.toFixed(2)}</div>
+            <div className="font-weight-bold">Total: {totalAmount.toFixed(2)}</div>
             <div>
-                <Button variant="secondary" onClick={() => hideCart()}>Chiudi</Button>
+                <Button variant="secondary" onClick={() => hideCart()}>Close</Button>
                 <Button variant="primary" onClick={() => {
                   handleConfirm(); 
-                  navigate('/'); }} >Conferma</Button>
+                  navigate('/'); }} >Confirm</Button>
             </div>
         </Modal.Footer>
       </Modal>

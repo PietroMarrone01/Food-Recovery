@@ -16,7 +16,7 @@ function PackageRow(props) {
 
   const renderContent = () => {
     if (p.content && p.content.length > 0) {
-      // Se ci sono elementi in content, li mostreremo come un elenco puntato
+      // If there are items in content, show them as a bulleted list
       return (
         <ul>
           {p.content.map((item, index) => (
@@ -40,7 +40,7 @@ function PackageRow(props) {
   const endTime = p.endTime.format('HH:mm');
   const currentTime = dayjs().format('HH:mm');
 
-  // Funzione per controllare se l'orario corrente è compreso tra startTime e endTime
+  // Function to check if the current time is between startTime and endTime
   const timeCheck = (currentTime, endTime) => {
     return currentTime < endTime;
   };
@@ -59,7 +59,7 @@ function PackageRow(props) {
       <td>
         <Button variant='primary' className='float-end' onClick={()=>{addToCart(p); setShowCart(true)}}
         disabled={addedRestaurants.includes(p.restaurantId) || p.availability===0 || !isWithinTimeRange}>
-          Aggiungi al carrello
+          Add to Cart
         </Button>
       </td>
     </tr>
@@ -83,12 +83,12 @@ function PackagesList(props) {
     return new Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, 0);
   });
 
-  // Funzione per contare il numero di oggetti con availability = 0
+  // Function to count the number of objects with availability = 0
   function countAvailabilityZero(packagesList) {
     return packagesList.filter(p => p.availability === 0).length;
   }
   
-  // Funzione per contare il numero di oggetti con availability = 1
+  // Function to count the number of objects with availability = 1
   function countAvailabilityOne(packagesList) {
     return packagesList.filter(p => p.availability === 1).length;
   }
@@ -100,16 +100,16 @@ function PackagesList(props) {
         <Col className="mt-3">
           <Alert variant="info" className="text-center">
             <h5 className="font-weight-bold">
-              E' possibile inserire nel carrello un solo pacchetto disponibile per ristorante. I pacchetti la cui "Data fine prelievo" è scaduta non possono più essere selezionati.
+            It is possible to add only one available package per restaurant to the cart. Packages whose "Withdrawal End Date" has expired can no longer be selected.
             </h5>
           </Alert>
         </Col>
       </Row>
       <Row>
         <Col className="mt-3">
-          <p className='fw-bold'>Pacchetti a disposizione nel ristorante: {packagesList[0].restaurantName}</p>
-          <p>Numero pacchetti disponibili: {countAvailabilityOne(packagesList)}</p>
-          <p>Numero pacchetti prenotati: {countAvailabilityZero(packagesList)}</p>
+          <p className='fw-bold'>Packages available in the restaurant: {packagesList[0].restaurantName}</p>
+          <p>Number of packages available: {countAvailabilityOne(packagesList)}</p>
+          <p>Number of packages booked: {countAvailabilityZero(packagesList)}</p>
         </Col>
       </Row>
       <Row>
@@ -117,13 +117,13 @@ function PackagesList(props) {
           <Table hover>
             <thead>
               <tr>
-                <th>Tipo pacchetto</th>
-                <th>Contenuto</th>
-                <th>Prezzo</th>
-                <th>Dimensione</th>
-                <th>Data inizio prelievo</th>
-                <th>Data fine prelievo</th>
-                <th>Disponibilità</th>
+                <th>Package type</th>
+                <th>Content</th>
+                <th>Price</th>
+                <th>Size</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Availability</th>
               </tr>
             </thead>
             <tbody>
@@ -140,13 +140,13 @@ function PackagesList(props) {
           setLoading(true);
           showBookings();
           navigate('/bookings'); }} 
-          disabled={props.user?.id? false : true}> Le mie prenotazioni 
+          disabled={props.user?.id? false : true}> My reservations
         </Button>
         </Col>
       </Row>
       <Row>
         <Col>
-        <Button variant='secondary' onClick={()=>navigate('/')} disabled={props.user?.id? false : true}> Torna ai Ristoranti </Button>
+        <Button variant='secondary' onClick={()=>navigate('/')} disabled={props.user?.id? false : true}> Return to Restaurants </Button>
         </Col>
       </Row>
     </>

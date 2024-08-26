@@ -3,8 +3,8 @@ import dayjs from "dayjs";
 const URL = 'http://localhost:3001/api';
 
 /**
- * Restituisce la lista di tutti i ristoranti.
- * Mappa i dati ricevuti dal server in un nuovo oggetto con le proprietà desiderate.
+ * Returns the list of all restaurants.
+ * Maps the data received from the server into a new object with the desired properties.
  */
 async function getAllRestaurants() {
   const response = await fetch(URL + '/restaurants');
@@ -25,8 +25,8 @@ async function getAllRestaurants() {
 }
 
 /**
- * Restituisce la lista di tutti i pacchetti per uno specifico ristorante usando il suo ID.
- * Mappa i dati ricevuti dal server in un nuovo oggetto con le proprietà desiderate.
+ * Returns the list of all packages for a specific restaurant using its ID.
+ * Maps the data received from the server into a new object with the desired properties.
  */
 async function getPackagesForRestaurant(restaurantId) {
   const response = await fetch(`${URL}/restaurants/${restaurantId}/packages`, {credentials: 'include',});
@@ -51,8 +51,8 @@ async function getPackagesForRestaurant(restaurantId) {
 }
 
 /**
- * Recupera tutte le prenotazioni di un utente.
- * Ritorna un array di oggetti che rappresentano le prenotazioni, ciascuna con le informazioni di tutti i pacchetti da cui è composta.
+ * Retrieves all bookings of a user.
+ * Returns an array of objects representing the bookings, each with the information of all the packages it includes.
  */
 async function getAllBookings() {
   const response = await fetch(`${URL}/bookings`, { credentials: 'include' });
@@ -84,11 +84,11 @@ async function getAllBookings() {
 }
 
 /**
- * Crea una prenotazione inviando al server un array di ID dei pacchetti selezionati.
- * @param {Array} packageIds - Array di ID dei pacchetti selezionati
- * @param {Array} packageContents - Array dei contenuti dei pacchetti selezionati (Array di Array di oggetti)
- * @returns {Promise} - Promise che si risolve con la risposta del server in caso di successo,
- * altrimenti viene rigettata con un oggetto di errore.
+ * Creates a booking by sending an array of selected package IDs to the server.
+ * @param {Array} packageIds - Array of selected package IDs.
+ * @param {Array} packageContents - Array of selected package contents (Array of Arrays of objects).
+ * @returns {Promise} - Promise that resolves with the server's response on success,
+ * otherwise it is rejected with an error object.
  */
 export function createBooking(packageIds, packageContents) {
   return new Promise((resolve, reject) => {
@@ -117,10 +117,10 @@ export function createBooking(packageIds, packageContents) {
 }
 
 /**
- * Elimina una prenotazione dal server.
- * @param {string} bookingId - L'ID della prenotazione da eliminare.
- * Ritorna una Promise che si risolve con null se l'eliminazione è avvenuta con successo, altrimenti viene 
- * rigettata con un messaggio di errore.
+ * Deletes a booking from the server.
+ * @param {string} bookingId - The ID of the booking to delete.
+ * Returns a Promise that resolves with null if the deletion was successful, otherwise it is 
+ * rejected with an error message.
  */
 function deleteBooking(id) {
   return new Promise((resolve, reject) => {
@@ -142,7 +142,7 @@ function deleteBooking(id) {
 
 
 /** 
- * API per AUTENTICAZIONE 
+ * AUTHENTICATION API 
  **/
 
 async function logIn(credentials) {
@@ -163,7 +163,7 @@ async function logIn(credentials) {
   }
 }
 
-//usata in doLogOut in file App.jsx
+//used in doLogOut in the App.jsx file
 async function logOut() {
   await fetch(URL+'/sessions/current', {
     method: 'DELETE', 
@@ -171,7 +171,7 @@ async function logOut() {
   });
 }
 
-//chiamata nella prima useEffect di App.jsx
+//called in the first useEffect of App.jsx
 async function getUserInfo() {
   const response = await fetch(URL+'/sessions/current', {
     credentials: 'include'

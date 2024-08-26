@@ -143,17 +143,17 @@ app.post('/api/bookings', isLoggedIn, [
   const userId = req.user.id;
   
   try {
-    // Controlla la disponibilità dei pacchetti
+    // Check package availability
     const unavailablePackages = await dao.checkPackageAvailability(packageIds);
 
     if (unavailablePackages.length !== 0) {
-      // Alcuni pacchetti non sono disponibili
+      // Some packages are not available
       //console.log(unavailablePackages);
       res.json(unavailablePackages);
       return;
     }
 
-    // Tutti i pacchetti sono disponibili, crea la prenotazione
+    // All packages are available, create your reservation
     const bookingId = await dao.createBooking(userId, packageIds, packageContents);
 
     res.json(bookingId);
@@ -208,7 +208,7 @@ app.delete('/api/sessions/current', (req, res) => {
   req.logout( ()=> { res.end(); } );
 });
 
-// GET /sessions/current --> ci da informazione se utente è autenticato
+// GET /sessions/current --> it gives us information if the user is authenticated
 // check whether the user is logged in or not
 app.get('/api/sessions/current', (req, res) => {  if(req.isAuthenticated()) {
     res.status(200).json(req.user);}

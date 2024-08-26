@@ -9,7 +9,7 @@ const db = new sqlite.Database('food_db.sqlite', (err) => {
   if(err) throw err;
 });
 
-/** Ottieni tutti i ristoranti */ 
+/** Get all restaurants */ 
 exports.listRestaurants = () => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM restaurants';
@@ -32,7 +32,7 @@ exports.listRestaurants = () => {
 };
 
 
-/** Ottieni i pacchetti per un ristorante specifico */
+/** Get packages for a specific restaurant */
 exports.listPackagesForRestaurant = (restaurantId) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM packages WHERE restaurant_id = ?';
@@ -60,7 +60,7 @@ exports.listPackagesForRestaurant = (restaurantId) => {
 };
 
 
-/** Ottieni tutte le prenotazioni per un utente */
+/** Get all bookings for a user */
 exports.listBookingsForUser = (userId) => {
   return new Promise((resolve, reject) => {
     const sql = `
@@ -90,21 +90,21 @@ exports.listBookingsForUser = (userId) => {
       }
 
       const bookings = [];
-      let currentBooking = null;  // tenere traccia della prenotazione corrente mentre si scorrono i risultati della query
+      let currentBooking = null;  // keep track of the current reservation as you scroll through the query results
 
       rows.forEach((row) => {
-        //Se la prenotazione corrente non esiste ancora o l'ID della prenotazione corrente è diverso da quello della riga corrente, 
-        //viene creata una nuova prenotazione in currentBooking
+        // If the current booking does not yet exist or the current booking ID is different from the current row's ID,
+        // a new booking is created in currentBooking.
         if (!currentBooking || currentBooking.id !== row.booking_id) {
           currentBooking = {
             id: row.booking_id,
             user_id: row.user_id,
 
-            //split(',') suddivide la stringa package_ids in un array utilizzando la virgola come separatore. 
-            //Converto poi ogni elemento in un intero base 10
+            //split(',') splits package_ids string into an array using comma as separator.
+            //I then convert each element to a base 10 integer
             package_ids: row.package_ids.split(',').map(id => parseInt(id, 10)),
 
-            // Parsing del campo package_contents. Da stringa JSON diventa oggetto JS
+            // Parsing the package_contents field. From JSON string it becomes JS object
             package_contents: JSON.parse(row.package_contents), 
             packages: [],
           };
@@ -118,7 +118,7 @@ exports.listBookingsForUser = (userId) => {
           restaurant_id: row.restaurant_id,
           restaurant_name: row.restaurant_name,
           surprise_package: row.surprise_package === 1,
-          content: currentBooking.package_contents[packageIndex], // Utilizza l'indice corrispondente di package_ids
+          content: currentBooking.package_contents[packageIndex], // Use the corresponding index of package_ids
           price: row.price,
           size: row.size,
           start_time: dayjs(row.start_time),
@@ -164,29 +164,29 @@ exports.checkPackageAvailability = (packageIds) => {
 };
 
 
-/** Crea una nuova prenotazione per un utente. Setta la disponibilità dei pacchetti a 0. */
+/** Create a new reservation for a user. Set package availability to 0. */
 exports.createBooking = (userId, packageIds, packageContents) => {
   return new Promise((resolve, reject) => {
     const sqlInsertBooking = 'INSERT INTO bookings(user_id, package_ids, package_contents) VALUES (?, ?, ?)'; 
     const sqlUpdateAvailability = 'UPDATE packages SET availability = 0 WHERE id = ?';
 
-    // Concatenazione degli ID dei pacchetti in una stringa separata da virgole
+    // Concatenation of package IDs into a comma-separated string
     const concatenatedPackageIds = packageIds.join(',');
 
-    // Serializza l'array di array di oggetti in formato JSON
+    // Serialize the array of object arrays in JSON format
     const serializedPackageContents = JSON.stringify(packageContents);
 
-    // Esecuzione dell'inserimento della prenotazione
+    // Carrying out the booking entry
     db.run(sqlInsertBooking, [userId, concatenatedPackageIds, serializedPackageContents], function (err) {
       if (err) {
         reject(err);
         return;
       }
 
-      // Restituisce l'ID dell'ultima prenotazione inserita
+      // Returns the ID of the last reservation entered
       const bookingId = this.lastID;
 
-      // Aggiorna l'availability a 0 per i pacchetti prenotati
+      // Update availability to 0 for pre-booked packages
       packageIds.forEach((packageId) => {
         db.run(sqlUpdateAvailability, [packageId], (err) => {
           if (err) {
@@ -201,7 +201,7 @@ exports.createBooking = (userId, packageIds, packageContents) => {
 };
 
 
-/** Elimina una prenotazione per un utente. Risetta la disponibilità dei pacchetti a 1. */
+/** Delete a reservation for a user. Reset package availability to 1. */
 exports.deleteBooking = (bookingId, userId) => {
   return new Promise((resolve, reject) => {
     // ID dei pacchetti dalla prenotazione
@@ -217,10 +217,10 @@ exports.deleteBooking = (bookingId, userId) => {
         return;
       }
 
-      // Utilizzo gli ID dei pacchetti come array di numeri
+      // I use package IDs as arrays of numbers
       const packageIds = row.package_ids.split(',').map(id => parseInt(id, 10));
 
-      // Aggiorno la disponibilità dei pacchetti
+      // Update the availability of the packages
       const sqlUpdateAvailability = 'UPDATE packages SET availability = 1 WHERE id IN (' + packageIds.join(',') + ')';
       db.run(sqlUpdateAvailability, function (err) {
         if (err) {
@@ -228,7 +228,7 @@ exports.deleteBooking = (bookingId, userId) => {
           return;
         }
 
-        // Elimina la prenotazione
+        // Delete the reservation
         const sqlDeleteBooking = 'DELETE FROM bookings WHERE id = ? AND user_id = ?';
         db.run(sqlDeleteBooking, [bookingId, userId], function (err) {
           if (err) {
@@ -236,7 +236,7 @@ exports.deleteBooking = (bookingId, userId) => {
             return;
           }
 
-          resolve(this.changes);  // Numero di righe interessate
+          resolve(this.changes);  // Number of rows affected
         });
       });
     });

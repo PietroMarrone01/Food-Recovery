@@ -27,7 +27,7 @@ function ResRow(props) {
             navigate(`/restaurants/${e.id}`); }}
           disabled={props.user?.id? false : true}  
         >
-          Entra nel negozio!
+          Enter the shop!
         </Button>
       </td>
     </tr>
@@ -41,14 +41,14 @@ function MainRestaurants(props) {
   
   const navigate = useNavigate();
 
-  //Creo un array di oggetti di tipo Restaurant
+  //Create an array of Restaurant type objects
   const restaurantsList = props.restaurants.map((restaurant) => {
     const { id, name, address, phoneNumber, cuisineType, foodCategory } = restaurant;
     return new Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory);
   });
 
-  /** ---- INIZIO PARTE PER ORDINAMENTO ALFABETICO ---- */
-  //Stato locale per la visualizzazione in ordine alfabetico
+  /** ---- START FOR ALPHABETICAL ORDER ---- */
+  //Local status for alphabetical display
   const [sortOrder, setSortOrder] = useState('asc');  
 
   if (sortOrder === 'asc') {
@@ -60,7 +60,7 @@ function MainRestaurants(props) {
   const sortByName = () => {
     setSortOrder( (oldSortOrder) => oldSortOrder === 'asc' ? 'desc' : 'asc' );
   }
-  /** ---- FINE PARTE PER ORDINAMENTO ALFABETICO ---- */
+  /** ---- END FOR ALPHABETICAL ORDER ---- */
 
   return (
     <>
@@ -74,14 +74,14 @@ function MainRestaurants(props) {
           <Table hover>
             <thead>
               <tr>
-                <th>Nome
-                  {/*Vicino a stringa "Nome" piazzo il tag "i" che in base al valore dello stato sortOrder cambia disengo. Al click del disegno, chiama la funzione sortByScore che si occupa della modifica dello stato*/}
+                <th>Name
+                  {/*Near the "Name" string I place the "i" tag which changes the design based on the value of the sortOrder state. When the drawing is clicked, it calls the sortByScore function which takes care of changing the state*/}
                   <i className={'mx-1 '+(sortOrder ==='asc' ? 'bi bi-sort-alpha-down' : 'bi bi-sort-alpha-up')} onClick={() => sortByName()} style={{color: 'black'}}/>
                 </th>
-                <th>Indirizzo</th>
-                <th>Numero di telefono</th>
-                <th>Tipo di cucina</th>
-                <th>Categoria di cibo</th>
+                <th>Address</th>
+                <th>Telephone number</th>
+                <th>Type of cuisine</th>
+                <th>Food category</th>
               </tr>
             </thead>
             <tbody>
@@ -98,7 +98,7 @@ function MainRestaurants(props) {
           props.setLoading(true);
           showBookings(); 
           navigate('/bookings'); }}  
-          disabled={props.user?.id? false : true}> Le mie prenotazioni </Button>
+          disabled={props.user?.id? false : true}> My reservations </Button>
         </Col>
       </Row>
     </>

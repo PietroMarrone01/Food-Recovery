@@ -127,10 +127,10 @@ function Restaurant(id, name, address, phoneNumber, cuisineType, foodCategory) {
   }
 
 /**
- * Il tipo di Pacchetto offerto dal ristorante, utilizzato nell'applicazione.
- * @param surprisePackage indica se il pacchetto è una sorpresa (0 per pacchetto normale, 1 per sorpresa)
- * @param availability indica se il pacchetto è disponibile (0 per false, 1 per true)
- * @param removedItems indica il numero di tipi di cibo eliminati per ciascun pacchetto presente nel carrello 
+ * The type of Package offered by the restaurant, used in the application.
+ * @param surprisePackage indicates if the package is a surprise (0 for normal package, 1 for surprise)
+ * @param availability indicates if the package is available (0 for false, 1 for true)
+ * @param removedItems indicates the number of types of food removed for each package present in the cart 
  */
 function Package(id, restaurantId, restaurantName, surprisePackage, content, price, size, startTime, endTime, availability, removedItems) {
   this.id = id;

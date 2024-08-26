@@ -8,7 +8,7 @@ import {NavHeader} from './Miscellaneous';
 
 
 /**
- * Uno spinner di caricamento.
+ * A loading spinner.
  */
 function LoadingSpinner() {
     return (
@@ -21,7 +21,7 @@ function LoadingSpinner() {
   }
 
 /** 
- * Informa l'utente che la route non è valida 
+ * Informs the user that the route is invalid
  */
 function NotFoundPage() {
   return (
@@ -36,17 +36,17 @@ function NotFoundPage() {
 }
 
 /**
- * Route per la visualizzazione dei ristoranti.
+ * Route for displaying restaurants.
  */
 function RestaurantRoute(props) {
     return (
       <>
         <NavHeader user={props.user} logout={props.logout} />
-        {props.bookingSuccess? ( //stampa messaggio di successo se la prenotazione è comfermata
+        {props.bookingSuccess? ( //print success message if booking is confirmed
         <Alert variant="success" className="my-2 text-center">
           Prenotazione confermata con successo!
         </Alert> ) : null}
-        {props.user? //se l'utente è loggato, mostro la lista dei ristoranti + il carrello
+        {props.user? //if the user is logged in, show the list of restaurants + the cart
         <Container fluid>
           {props.errorMsg? 
           <Alert variant='danger' dismissible className='my-2' onClose={props.resetErrorMsg}> {props.errorMsg}</Alert> : null}
@@ -61,7 +61,7 @@ function RestaurantRoute(props) {
               highlightUnavailable={props.highlightUnavailable}/>
             </Col>
           </Row>) }
-        </Container> : //se utente non è loggato mostro solo lista dei ristoranti
+        </Container> : //if user is not logged in I only show list of restaurants
         <Container fluid>
           {props.errorMsg? 
           <Alert variant='danger' dismissible className='my-2' onClose={props.resetErrorMsg}> {props.errorMsg}</Alert> : null}
@@ -74,7 +74,7 @@ function RestaurantRoute(props) {
 }
 
 /**
- * Route per la visualizzazione dei pacchetti.
+ * Route for viewing packets.
  */
 function PackageRoute(props) {
   return (
@@ -102,7 +102,7 @@ function PackageRoute(props) {
 }
 
 /**
- * Route per la visualizzazione delle prenotazioni. 
+ * Route for viewing reservations.
  */
 function BookingRoute(props) {
   return (

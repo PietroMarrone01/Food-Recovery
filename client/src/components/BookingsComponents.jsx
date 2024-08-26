@@ -26,12 +26,12 @@ function BookRow(props) {
         <ol>
           {booking.packages.map((p) => (
             <li key={`${booking.id}-${p.packageId}`}>
-              <strong className="green-underline-text">Ristorante {p.restaurantName}:</strong> <br />
-              <strong>Tipo:</strong> {p.surprisePackage ? 'Sorpresa' : 'Normale'} <br />
-              <strong>Prezzo:</strong> {p.price} <br />
-              <strong>Dimensione:</strong> {p.size} <br />
-              <strong>Data inizio prelievo:</strong> {p.startTime.format('HH:mm')} <br />
-              <strong>Data fine prelievo:</strong> {p.endTime.format('HH:mm')}
+              <strong className="green-underline-text">Restaurant {p.restaurantName}:</strong> <br />
+              <strong>Type:</strong> {p.surprisePackage ? 'Sorpresa' : 'Normale'} <br />
+              <strong>Price:</strong> {p.price} <br />
+              <strong>Size:</strong> {p.size} <br />
+              <strong>Start Time:</strong> {p.startTime.format('HH:mm')} <br />
+              <strong>End Time:</strong> {p.endTime.format('HH:mm')}
             </li>
           ))}
         </ol>
@@ -40,17 +40,17 @@ function BookRow(props) {
         <ol>
           {booking.packages.map((p) => (
           <li key={`${booking.id}-${p.packageId}-content`}>
-            <strong className="green-underline-text">Ristorante {p.restaurantName} :</strong>
+            <strong className="green-underline-text">Restaurant {p.restaurantName} :</strong>
             {p.content ? (
             <ul>
               {p.content.map((item, index) => (
               <li key={`${booking.id}-${p.packageId}-content-${index}`}>
-                {item.name} - Quantità: {item.quantity}
+                {item.name} - Quantity: {item.quantity}
               </li>
               ))}
             </ul>) : (
             <ul>
-              <li>Pacchetto sorpresa, nessun contenuto disponibile</li>
+              <li>Surprise package, no content available</li>
             </ul>)}
           </li>
           ))}
@@ -60,7 +60,7 @@ function BookRow(props) {
         <Button variant="danger" onClick={() => {
           deleteBooking(booking.id); 
           }} >
-          Cancella prenotazione
+          Cancel reservation
         </Button>
       </td>
     </tr>
@@ -76,20 +76,20 @@ function BookingsList(props) {
 
   return (
     <>
-      <h2>Elenco Prenotazioni effettuate da {user.name}</h2>
+      <h2>List of reservations made by {user.name}</h2>
       {noBookings?           
       <Alert variant="info" className="text-center">
         <h5 className="font-weight-bold">
-          Non hai effettuato ancora nessuna prentazione. Torna ai Ristoranti per prenotare i tuoi pacchetti!
+        You haven't made any reservations yet. Go back to the restaurants to book your packages!
         </h5>
       </Alert> :       
       <Table hover>
         <thead>
           <tr>
-            <th>N° prenotazione</th>
-            <th>N° pacchetti prenotati</th>
-            <th>Dettagli Pacchetti</th>
-            <th>Contenuto Pacchetti</th>
+            <th>Reservation number</th>
+            <th>No. of packages booked</th>
+            <th>Package Details</th>
+            <th>Package Contents</th>
           </tr>
         </thead>
         <tbody>
@@ -101,7 +101,7 @@ function BookingsList(props) {
       <Row className="mt-3">
         <Col>
           <Button variant="secondary" onClick={() => navigate('/')} disabled={!user?.id}>
-            Torna ai Ristoranti
+          Return to Restaurants
           </Button>
         </Col>
       </Row>
